@@ -1,6 +1,7 @@
 import json
 from datetime import datetime
 from data.Person import Person
+from data.Validator import Validator
 
 
 class Student(Person):
@@ -36,12 +37,6 @@ class Student(Person):
     def get_desired_skills(self):
         return self._desired_skills
 
-    def get_student(self, email):
-        if type(email) != str:
-            return False
-        else:
-            return self
-
     def __str__(self):
         return json.dumps(self.__dict__)
 
@@ -55,17 +50,22 @@ class Student(Person):
         return json.loads(st_instance.__str__())
 
     def validate_new_student(self):
-        if (type(self.get_email())) is None and (type(self.get_email())) is None:
+        if Validator.validate_email(self._email) is False:
             return False
-        elif (type(self.get_email())) != str and (type(self.get_email())) != str:
+        elif Validator.validate_field(self._last_name) is False:
+            return False
+        elif Validator.validate_field(self._id_num) is False:
+            return False
+        elif Validator.validate_field(self.__password) is False:
             return False
         else:
             return True
 
+
     def validate_login_student(self):
-        if (type(self.get_email())) is None and (type(self.get_email())) is None:
+        if Validator.validate_field(self._email) is False:
             return False
-        elif (type(self.get_email())) != str and (type(self.get_email())) != str:
+        elif Validator.validate_field(self.__password) is False:
             return False
         else:
             return True
@@ -73,9 +73,23 @@ class Student(Person):
     def validate_existing_student(self):
         if self is None:
             return False
-        elif (type(self.get_email())) is None and (type(self.get_email())) is None:
+        if Validator.validate_email(self._email) is False:
             return False
-        elif (type(self.get_email())) != str and (type(self.get_email())) != str:
+        elif Validator.validate_field(self._last_name) is False:
+            return False
+        elif Validator.validate_field(self.__password) is False:
+            return False
+        else:
+            return True
+
+    def validate_getting_by_email(self):
+        if Validator.validate_email(self._email) is False:
+            return False
+        else:
+            return True
+
+    def validate_date(self):
+        if Validator.validate_field(self._creation_time) is False:
             return False
         else:
             return True

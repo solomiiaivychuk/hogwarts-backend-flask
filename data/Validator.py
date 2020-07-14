@@ -18,3 +18,14 @@ class Validator:
             return False
         else:
             return True
+
+    @staticmethod
+    def validate_field(field):
+        if field is None:
+            return False
+        elif type(field) != str:
+            return False
+        elif len(field) == 0:
+            return False
+        else:
+            return True
