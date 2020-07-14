@@ -40,14 +40,20 @@ class Student(Person):
     def __str__(self):
         return json.dumps(self.__dict__)
 
+    def append_skill(self, skill):
+        self._existing_skill.append(skill)
+
+    def wish_skill(self, skill):
+        self._desired_skills.append(skill)
+
+    # to check !!!
     @classmethod
     def from_json(cls, id_num, first_name, last_name, email, password):
         existing_skills = []
         desired_skills = []
-        creation_date = datetime.now()
+        creation_date = datetime.now().__str__()[:-7]
         update_time = ""
-        st_instance = cls(id_num, first_name, last_name, email, password, creation_date, update_time, existing_skills, desired_skills)
-        return json.loads(st_instance.__str__())
+        return cls(id_num, first_name, last_name, email, password, creation_date, update_time, existing_skills, desired_skills)
 
     def validate_new_student(self):
         if Validator.validate_email(self._email) is False:

@@ -1,10 +1,11 @@
 from flask import Flask, request
+from data.Student import Student
+from data.DataLayer import DataLayer
+from data.Skill import Skill
+from data.Professor import Professor
+import json
 
 app = Flask(__name__)
-
-if __name__ == '__main__':
-    app.run()
-
 
 # get list of all students
 @app.route('/students')
@@ -42,9 +43,17 @@ def get_existing_skills():
 
 
 # add a new student (request which will be invoked by admin) - the route will receive a json with the student fields.
-@app.route('/students/add', methods=['POST'])
+@app.route('/students', methods=['POST'])
 def add_new_student():
-    return
+    content = request.json
+    student = Student.from_json(content['id_num'], content['first_name'], content['last_name'], content['email'], content['password'])
+    DataLayer.add_student(student)
+    response = app.response_class(
+        response={json.dumps(student.__dict__)},
+        status=200,
+        mimetype='application/json'
+    )
+    return response
 
 
 # login a student(email + password) - the route will receive a json with the data.
@@ -63,3 +72,7 @@ def edit_student():
 @app.route('/students', methods=['DELETE'])
 def delete_student():
     return
+
+
+if __name__ == '__main__':
+    app.run()
