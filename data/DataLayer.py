@@ -7,21 +7,27 @@ from data.Skill import Skill
 class DataLayer:
     students = {}
 
-    def get_students(self):
-        if self._students is None:
+    @staticmethod
+    def get_students_as_dict():
+        if DataLayer.students is None:
             return "The list of students does not exist"
-        if len(self._students) == 0:
+        if len(DataLayer.students) == 0:
             return "The list of students is empty"
         else:
-            return json.dumps(self._students)
+            return DataLayer.students
 
-    def get_student_by_email(self, email):
-        if email not in self._students.keys():
+    @staticmethod
+    def get_students_as_json():
+        return json.dumps(DataLayer.get_students_as_dict())
+
+    @staticmethod
+    def get_student_by_email(email):
+        if email not in DataLayer.students:
             return "The student with this email does not exist"
         else:
-            for s in self._students:
-                if s._email == email:
-                    return self._students[s]
+            for key, student in DataLayer.students.items():
+                if student._email == email:
+                    return student.__str__()
 
     @staticmethod
     def add_student(student):

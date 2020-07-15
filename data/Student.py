@@ -4,7 +4,7 @@ from data.Person import Person
 from data.Validator import Validator
 
 
-class Student(Person):
+class Student(Person, dict):
     def __init__(self, id_num, first_name, last_name, email, password, creation_time, update_time, existing_skills=[],
                  desired_skills=[]):
         super().__init__(id_num, first_name, last_name, email, password)
@@ -46,7 +46,6 @@ class Student(Person):
     def wish_skill(self, skill):
         self._desired_skills.append(skill)
 
-    # to check !!!
     @classmethod
     def from_json(cls, id_num, first_name, last_name, email, password):
         existing_skills = []

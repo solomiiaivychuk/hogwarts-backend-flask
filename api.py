@@ -7,16 +7,16 @@ import json
 
 app = Flask(__name__)
 
+
 # get list of all students
 @app.route('/students')
 def get_all_students():
-    return
-
+    return DataLayer.get_students_as_json()
 
 # get student by email - email will be a path param
 @app.route('/students/<email>')
 def get_students_by_email(email):
-    return
+    return DataLayer.get_student_by_email(email)
 
 
 # get added students per day of the year - day will be a query param
@@ -57,7 +57,7 @@ def add_new_student():
 
 
 # login a student(email + password) - the route will receive a json with the data.
-@app.route('/students', methods=['POST'])
+@app.route('/login', methods=['POST'])
 def login_student():
     return
 
