@@ -31,7 +31,9 @@ def get_students_added_on_date():
     creation_year = request.args.get('year')
     creation_month = request.args.get('month')
     creation_day = request.args.get('day')
-    return
+    for k, v in DataLayer.students.items():
+        if creation_day == v._creation_time.year and creation_month == v._creation_time.month and creation_year == v._creation_time.year:
+            return v.__str__()
 
 
 # get count of desired skills (how many of the students desire a specific skill)
@@ -70,8 +72,31 @@ def add_new_student():
 # login a student(email + password) - the route will receive a json with the data.
 @app.route('/login', methods=['POST'])
 def login_student():
+    content = request.json
+    email = content['email']
     return
 
+@app.route('/skill', methods=['POST'])
+def add_skill_to_student():
+    content = request.json
+    email = content["email"]
+    skill_name = content["skill"]
+    skill = Skill(skill_name)
+    student_name = ""
+    if email in DataLayer.students:
+        DataLayer.add_skill(DataLayer.students[email], skill)
+        for key, student in DataLayer.students.items():
+            student_name = student._first_name + " " + student._last_name
+            for skill in student._existing_skill:
+                print(skill)
+        response = app.response_class(
+            response={str.format("Student {} acquired new skill: {}", student_name, skill.name)},
+            status=200,
+            mimetype='application/json'
+        )
+        return response
+    else:
+        return "There is no student with this email"
 
 # edit student - the route will receive a json with the student fields.
 @app.route('/students', methods=['PUT'])
