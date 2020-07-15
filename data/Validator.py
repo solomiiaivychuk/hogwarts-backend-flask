@@ -8,7 +8,7 @@ class Validator:
             return False
         elif type(email) != str:
             return False
-        elif len(email) != len(email.split()):
+        elif len(email) != len(email.strip()):
             return False
         elif (len(email) - at_index) < 3:
             return False

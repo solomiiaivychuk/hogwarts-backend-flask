@@ -64,7 +64,7 @@ class Student(Person, dict):
 
     @staticmethod
     def validate_new_student(student):
-        if Validator.validate_field(student._email) is False:
+        if Validator.validate_email(student._email) is False:
             return False
         elif Validator.validate_field(student._last_name) is False:
             return False

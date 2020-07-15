@@ -74,7 +74,14 @@ def add_new_student():
 def login_student():
     content = request.json
     email = content['email']
-    return
+    password = content['password']
+    if email in DataLayer.students:
+        if password == DataLayer.students[email].get_password():
+            return "Logged in successfully"
+        else:
+            return "Wrong password"
+    else:
+        return "The email is not in the students database"
 
 @app.route('/skill', methods=['POST'])
 def add_skill_to_student():
@@ -94,6 +101,7 @@ def add_skill_to_student():
         return response
     else:
         return "There is no student with this email"
+
 
 # edit student - the route will receive a json with the student fields.
 @app.route('/students', methods=['PUT'])
