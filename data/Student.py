@@ -51,17 +51,20 @@ class Student(Person, dict):
         existing_skills = []
         desired_skills = []
         creation_date = datetime.now().__str__()[:-7]
-        update_time = ""
-        return cls(id_num, first_name, last_name, email, password, creation_date, update_time, existing_skills, desired_skills)
+        update_time = datetime.now().__str__()[:-7]
+        new_student = cls(id_num, first_name, last_name, email, password, creation_date, update_time, existing_skills, desired_skills)
+        return new_student
 
-    def validate_new_student(self):
-        if Validator.validate_email(self._email) is False:
+
+    @staticmethod
+    def validate_new_student(student):
+        if Validator.validate_email(student._email) is False:
             return False
-        elif Validator.validate_field(self._last_name) is False:
+        elif Validator.validate_field(student._last_name) is False:
             return False
-        elif Validator.validate_field(self._id_num) is False:
+        elif Validator.validate_field(student._id_num) is False:
             return False
-        elif Validator.validate_field(self.__password) is False:
+        elif Validator.validate_field(student.__password) is False:
             return False
         else:
             return True

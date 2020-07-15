@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 
 from data.Student import Student
 from data.Skill import Skill
@@ -38,10 +39,20 @@ class DataLayer:
         DataLayer.students[student.get_email()] = student
         print(DataLayer.students)
 
-    def add_skill(self, student, skill):
-        if student.get_email() not in self._students.keys():
-            return False
-        self._students[student.get_email()].append_skill(skill)
-        print(self)
+    @staticmethod
+    def add_skill(student, skill):
+        if student.get_email() not in DataLayer.students.keys():
+            return "The student with this email does not exist in the database"
+        else:
+            student._update_time = datetime.now().__str__()[:-7]
+            DataLayer.students[student.get_email()].append_skill(skill)
 
+# function for removing a student from the students dictionary
+    @staticmethod
+    def remove_student(email):
+        if email not in DataLayer.students.keys():
+            return "The student with this email does not exist in the database"
+        else:
+            DataLayer.students.pop(email)
+            return str.format("Deleted {} successfully", email)
 

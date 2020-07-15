@@ -69,9 +69,9 @@ def edit_student():
 
 
 # delete a student
-@app.route('/students', methods=['DELETE'])
-def delete_student():
-    return
+@app.route('/students/<email>', methods=['DELETE'])
+def delete_student(email):
+    return DataLayer.remove_student(email)
 
 
 if __name__ == '__main__':
