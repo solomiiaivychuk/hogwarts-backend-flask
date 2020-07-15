@@ -81,16 +81,13 @@ def add_skill_to_student():
     content = request.json
     email = content["email"]
     skill_name = content["skill"]
-    skill = Skill(skill_name)
-    student_name = ""
+    skill_level = content["level"]
+    skill = Skill(skill_name, skill_level)
     if email in DataLayer.students:
         DataLayer.add_skill(DataLayer.students[email], skill)
-        for key, student in DataLayer.students.items():
-            student_name = student._first_name + " " + student._last_name
-            for skill in student._existing_skill:
-                print(skill)
+        student_name = DataLayer.students[email].get_first_name() + " " + DataLayer.students[email].get_last_name()
         response = app.response_class(
-            response={str.format("Student {} acquired new skill: {}", student_name, skill.name)},
+            response={str.format("Student {} acquired new skill {} on a level {}", student_name, skill.name, skill.level)},
             status=200,
             mimetype='application/json'
         )
