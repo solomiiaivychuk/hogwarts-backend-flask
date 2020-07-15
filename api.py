@@ -8,6 +8,12 @@ import json
 app = Flask(__name__)
 
 
+"""
+The function will create a new dataLayer instance to be used by the flask app.
+Which will invoke the previously created function in order to populate the
+DataLayer’s students dictionary
+"""
+
 # get list of all students
 @app.route('/students')
 def get_all_students():
@@ -47,7 +53,12 @@ def get_existing_skills():
 def add_new_student():
     content = request.json
     student = Student.from_json(content['id_num'], content['first_name'], content['last_name'], content['email'], content['password'])
-    DataLayer.add_student(student)
+    if student is None:
+        return "Please make sure that all fields are filled"
+    if student._email in DataLayer.students:
+        return "The student with this email already exists"
+    else:
+        DataLayer.add_student(student)
     response = app.response_class(
         response={json.dumps(student.__dict__)},
         status=200,

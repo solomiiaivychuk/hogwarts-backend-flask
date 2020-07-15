@@ -7,7 +7,8 @@ from data.Validator import Validator
 class Student(Person, dict):
     def __init__(self, id_num, first_name, last_name, email, password, creation_time, update_time, existing_skills=[],
                  desired_skills=[]):
-        super().__init__(id_num, first_name, last_name, email, password)
+        super().__init__(id_num, first_name, last_name, email)
+        self.__password = password
         self._creation_time = creation_time
         self._update_time = update_time
         self._existing_skill = existing_skills
@@ -24,6 +25,9 @@ class Student(Person, dict):
 
     def get_email(self):
         return self._email
+
+    def get_password(self):
+        return self.__password
 
     def get_creation_time(self):
         return self._creation_time
@@ -53,12 +57,15 @@ class Student(Person, dict):
         creation_date = datetime.now().__str__()[:-7]
         update_time = datetime.now().__str__()[:-7]
         new_student = cls(id_num, first_name, last_name, email, password, creation_date, update_time, existing_skills, desired_skills)
-        return new_student
+        if Student.validate_new_student(new_student) is True:
+            return new_student
+        else:
+            return None
 
 
     @staticmethod
     def validate_new_student(student):
-        if Validator.validate_email(student._email) is False:
+        if Validator.validate_field(student._email) is False:
             return False
         elif Validator.validate_field(student._last_name) is False:
             return False
@@ -85,13 +92,13 @@ class Student(Person, dict):
             return False
         elif Validator.validate_field(self._last_name) is False:
             return False
-        elif Validator.validate_field(self.__password) is False:
+        elif Validator.validate_password(self.__password) is False:
             return False
         else:
             return True
 
     def validate_getting_by_email(self):
-        if Validator.validate_email(self._email) is False:
+        if Validator.validate_field(self._email) is False:
             return False
         else:
             return True

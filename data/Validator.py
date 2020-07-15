@@ -29,3 +29,12 @@ class Validator:
             return False
         else:
             return True
+
+    @staticmethod
+    def validate_password(password):
+        if password is None:
+            return False
+        elif len(password) < 5:
+            return False
+        else:
+            return True
