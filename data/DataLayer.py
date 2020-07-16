@@ -56,6 +56,14 @@ class DataLayer:
             student._update_time = datetime.now().__str__()[:-7]
             DataLayer.students[student.get_email()].append_skill(skill)
 
+    @staticmethod
+    def desire_skill(student, skill):
+        if student.get_email() not in DataLayer.students.keys():
+            return "The student with this email does not exist in the database"
+        else:
+            student._update_time = datetime.now().__str__()[:-7]
+            DataLayer.students[student.get_email()].wish_skill(skill)
+
     # function for removing a student from the students dictionary
     @staticmethod
     def remove_student(email):
@@ -104,3 +112,23 @@ class DataLayer:
             return "Edited successfully successfully"
         else:
             return "The email is not in the students database"
+
+# get count for how many students have each type of skill
+    @staticmethod
+    def get_existing_skill(skill):
+        count = 0
+        for key, student in DataLayer.students.items():
+            for existing_skill in student.get_existing_skills():
+                if existing_skill.name == skill:
+                    count += 1
+        return str.format('{} students have the skill "{}"', count, skill)
+
+# get count of desired skills (how many of the students desire a specific skill)
+    @staticmethod
+    def get_desired_skill(skill):
+        count = 0
+        for key, student in DataLayer.students.items():
+            for desired_skill in student.get_desired_skills():
+                if desired_skill.name == skill:
+                    count += 1
+        return str.format('{} students wish to have the skill "{}"', count, skill)

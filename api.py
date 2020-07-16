@@ -42,17 +42,18 @@ def get_students_added_on_date():
 
 
 # get count of desired skills (how many of the students desire a specific skill)
-@app.route('/skills')
+@app.route('/skills/wish')
 def get_desirable_skill():
     skill = request.args.get('skill')
-    return
+    return DataLayer.get_desired_skill(skill)
+
 
 
 # get count for how many students have each type of skill
 @app.route('/skills')
 def get_existing_skills():
-    num_of_students = request.args.get('students')
-    return
+    skill = request.args.get('skill')
+    return DataLayer.get_existing_skill(skill)
 
 
 # add a new student (request which will be invoked by admin) - the route will receive a json with the student fields.
@@ -90,7 +91,7 @@ def login_student():
         return "The email is not in the students database"
 
 
-@app.route('/skill', methods=['POST'])
+@app.route('/skills', methods=['POST'])
 def add_skill_to_student():
     content = request.json
     email = content["email"]
@@ -103,6 +104,27 @@ def add_skill_to_student():
         response = app.response_class(
             response={
                 str.format("Student {} acquired new skill {} on a level {}", student_name, skill.name, skill.level)},
+            status=200,
+            mimetype='application/json'
+        )
+        return response
+    else:
+        return "There is no student with this email"
+
+
+@app.route('/skills/wish', methods=['POST'])
+def add_desired_skill_to_student():
+    content = request.json
+    email = content["email"]
+    skill_name = content["skill"]
+    skill_level = content["level"]
+    skill = Skill(skill_name, skill_level)
+    if email in DataLayer.students:
+        DataLayer.desire_skill(DataLayer.students[email], skill)
+        student_name = DataLayer.students[email].get_first_name() + " " + DataLayer.students[email].get_last_name()
+        response = app.response_class(
+            response={
+                str.format("Student {} wishes to acquire new skill {} on a level {}", student_name, skill.name, skill.level)},
             status=200,
             mimetype='application/json'
         )

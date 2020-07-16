@@ -11,7 +11,7 @@ class Student(Person, dict):
         self.__password = password
         self._creation_time = creation_time
         self._update_time = update_time
-        self._existing_skill = existing_skills
+        self._existing_skills = existing_skills
         self._desired_skills = desired_skills
 
     def get_id(self):
@@ -36,7 +36,7 @@ class Student(Person, dict):
         return self._update_time
 
     def get_existing_skills(self):
-        return self._existing_skill
+        return self._existing_skills
 
     def get_desired_skills(self):
         return self._desired_skills
@@ -57,7 +57,7 @@ class Student(Person, dict):
         return json.dumps(self.__dict__)
 
     def append_skill(self, skill):
-        self._existing_skill.append(skill)
+        self._existing_skills.append(skill)
 
     def wish_skill(self, skill):
         self._desired_skills.append(skill)
