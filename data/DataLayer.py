@@ -91,3 +91,16 @@ class DataLayer:
                     return DataLayer.students
         except FileNotFoundError:
             return "File not found"
+
+    @staticmethod
+    def edit_student(email, field, value):
+        if email in DataLayer.students:
+            if field == 'first_name':
+                DataLayer.students[email].set_first_name(value)
+            elif field == 'last_name':
+                DataLayer.students[email].set_last_name(value)
+            elif field == 'password':
+                DataLayer.students[email].set_password(value)
+            return "Edited successfully successfully"
+        else:
+            return "The email is not in the students database"
