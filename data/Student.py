@@ -41,6 +41,18 @@ class Student(Person, dict):
     def get_desired_skills(self):
         return self._desired_skills
 
+    def set_first_name(self, new_first_name):
+        self._first_name = new_first_name
+
+    def set_last_name(self, new_last_name):
+        self._last_name = new_last_name
+
+    def set_email(self, new_email):
+        self._email = new_email
+
+    def set_password(self, new_password):
+        self.__password = new_password
+
     def __str__(self):
         return json.dumps(self.__dict__)
 
@@ -84,10 +96,12 @@ class Student(Person, dict):
         else:
             return True
 
-    def validate_existing_student(self):
+    def validate_editing_student(self):
         if self is None:
             return False
         if Validator.validate_email(self._email) is False:
+            return False
+        elif Validator.validate_field(self._first_name) is False:
             return False
         elif Validator.validate_field(self._last_name) is False:
             return False

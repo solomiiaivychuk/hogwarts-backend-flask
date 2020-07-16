@@ -7,17 +7,18 @@ import json
 
 app = Flask(__name__)
 
-
 """
 The function will create a new dataLayer instance to be used by the flask app.
 Which will invoke the previously created function in order to populate the
 DataLayer’s students dictionary
 """
 
+
 # get list of all students
 @app.route('/students')
 def get_all_students():
     return DataLayer.get_students_as_json()
+
 
 # get student by email - email will be a path param
 @app.route('/students/<email>')
@@ -54,7 +55,8 @@ def get_existing_skills():
 @app.route('/students', methods=['POST'])
 def add_new_student():
     content = request.json
-    student = Student.from_json(content['id_num'], content['first_name'], content['last_name'], content['email'], content['password'])
+    student = Student.from_json(content['id_num'], content['first_name'], content['last_name'], content['email'],
+                                content['password'])
     if student is None:
         return "Please make sure that all fields are filled"
     if student._email in DataLayer.students:
@@ -83,6 +85,7 @@ def login_student():
     else:
         return "The email is not in the students database"
 
+
 @app.route('/skill', methods=['POST'])
 def add_skill_to_student():
     content = request.json
@@ -94,7 +97,8 @@ def add_skill_to_student():
         DataLayer.add_skill(DataLayer.students[email], skill)
         student_name = DataLayer.students[email].get_first_name() + " " + DataLayer.students[email].get_last_name()
         response = app.response_class(
-            response={str.format("Student {} acquired new skill {} on a level {}", student_name, skill.name, skill.level)},
+            response={
+                str.format("Student {} acquired new skill {} on a level {}", student_name, skill.name, skill.level)},
             status=200,
             mimetype='application/json'
         )
@@ -105,14 +109,30 @@ def add_skill_to_student():
 
 # edit student - the route will receive a json with the student fields.
 @app.route('/students', methods=['PUT'])
-def edit_student():
-    return
+def edit_field():
+    content = request.json
+    email = content['email']
+    field = content['field']
+    value = content['value']
+    if email in DataLayer.students:
+        if field == 'first_name':
+            DataLayer.students[email].set_first_name(value)
+        elif field == 'last_name':
+            DataLayer.students[email].set_last_name(value)
+        elif field == 'password':
+            DataLayer.students[email].set_password(value)
+        return "Edited successfully successfully"
+    else:
+        return "The email is not in the students database"
 
 
 # delete a student
 @app.route('/students/<email>', methods=['DELETE'])
 def delete_student(email):
     return DataLayer.remove_student(email)
+
+
+# persist dictionary to a file
 
 
 if __name__ == '__main__':
