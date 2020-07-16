@@ -27,14 +27,18 @@ def get_students_by_email(email):
 
 
 # get added students per day of the year - day will be a query param
-@app.route('/students')
+@app.route('/students/date')
 def get_students_added_on_date():
     creation_year = request.args.get('year')
     creation_month = request.args.get('month')
     creation_day = request.args.get('day')
     for k, v in DataLayer.students.items():
-        if creation_day == v._creation_time.year and creation_month == v._creation_time.month and creation_year == v._creation_time.year:
+        if creation_year == v._creation_time[:4] and\
+                creation_month == v._creation_time[5:7] and \
+                creation_day == v._creation_time[8:10]:
             return v.__str__()
+        else:
+            return str.format("No students were added on {}-{}-{}", creation_year, creation_month, creation_day)
 
 
 # get count of desired skills (how many of the students desire a specific skill)
