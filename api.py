@@ -32,13 +32,15 @@ def get_students_added_on_date():
     creation_year = request.args.get('year')
     creation_month = request.args.get('month')
     creation_day = request.args.get('day')
-    for k, v in DataLayer.students.items():
-        if creation_year == v._creation_time[:4] and\
-                creation_month == v._creation_time[5:7] and \
-                creation_day == v._creation_time[8:10]:
-            return v.__str__()
+    response = []
+    for student in DataLayer.students.values():
+        if creation_year == student._creation_time[:4] and \
+                creation_month == student._creation_time[5:7] and \
+                creation_day == student._creation_time[8:10]:
+            response.append(student.__dict__)
         else:
-            return str.format("No students were added on {}-{}-{}", creation_year, creation_month, creation_day)
+            response = str.format("No students were added on {}-{}-{}", creation_year, creation_month, creation_day)
+    return json.dumps(response)
 
 
 # get count of desired skills (how many of the students desire a specific skill)
@@ -46,7 +48,6 @@ def get_students_added_on_date():
 def get_desirable_skill():
     skill = request.args.get('skill')
     return DataLayer.get_desired_skill(skill)
-
 
 
 # get count for how many students have each type of skill
@@ -124,7 +125,8 @@ def add_desired_skill_to_student():
         student_name = DataLayer.students[email].get_first_name() + " " + DataLayer.students[email].get_last_name()
         response = app.response_class(
             response={
-                str.format("Student {} wishes to acquire new skill {} on a level {}", student_name, skill.name, skill.level)},
+                str.format("Student {} wishes to acquire new skill {} on a level {}", student_name, skill.name,
+                           skill.level)},
             status=200,
             mimetype='application/json'
         )
@@ -150,6 +152,17 @@ def delete_student(email):
 
 
 # persist dictionary to a file
+@app.route('/save_dictionary')
+def persist_dict_to_file():
+    DataLayer.persist_dict_into_file()
+    return "Success"
+
+
+# load dictionary from a file
+@app.route('/load_dictionary')
+def persist_data_to_file():
+    DataLayer.load_dict_from_file()
+    return "Success"
 
 
 if __name__ == '__main__':
