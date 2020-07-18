@@ -81,9 +81,20 @@ class Student(Person, dict):
     def from_json(cls, id_num, first_name, last_name, email, password):
         existing_skills = []
         desired_skills = []
-        creation_date = datetime.now().__str__()[:-7]
+        creation_time = datetime.now().__str__()[:-7]
         update_time = datetime.now().__str__()[:-7]
-        new_student = cls(id_num, first_name, last_name, email, password, creation_date, update_time, existing_skills, desired_skills)
+        new_student = cls(id_num, first_name, last_name, email, password, creation_time, update_time, existing_skills,
+                          desired_skills)
+        if Student.validate_new_student(new_student) is True:
+            return new_student
+        else:
+            return None
+
+    @classmethod
+    def from_file(cls, id_num, first_name, last_name, email, password, existing_skills, desired_skills, creation_time,
+                  update_time):
+        new_student = cls(id_num, first_name, last_name, email, password, creation_time, update_time, existing_skills,
+                          desired_skills)
         if Student.validate_new_student(new_student) is True:
             return new_student
         else:

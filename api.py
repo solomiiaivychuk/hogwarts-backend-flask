@@ -7,12 +7,11 @@ import json
 
 app = Flask(__name__)
 
-"""
-The function will create a new dataLayer instance to be used by the flask app.
-Which will invoke the previously created function in order to populate the
-DataLayer’s students dictionary
-"""
 
+# load dictionary from a file
+@app.before_first_request
+def load_data_from_file():
+    return DataLayer.load_dict_from_file()
 
 # get list of all students
 @app.route('/students')
@@ -153,15 +152,8 @@ def delete_student(email):
 
 # persist dictionary to a file
 @app.route('/save_dictionary')
-def persist_dict_to_file():
+def persist_data_to_file():
     DataLayer.persist_dict_into_file()
-    return "Success"
-
-
-# load dictionary from a file
-@app.route('/load_dictionary')
-def load_dict_from_file():
-    DataLayer.load_dict_from_file()
     return "Success"
 
 

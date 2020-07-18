@@ -23,6 +23,7 @@ class DataLayer:
                     "first_name": student.get_first_name(),
                     "last_name": student.get_last_name(),
                     "email": student.get_email(),
+                    "password": student.get_password(),
                     "creation_time": student.get_creation_time(),
                     "update_time": student.get_update_time(),
                     "existing_skills": student.get_existing_skills(),
@@ -95,17 +96,59 @@ class DataLayer:
         except FileNotFoundError:
             return "File not found"
 
-    # function for loading the data from students.json, converting it to students class instances
-    # and populating the instances into the students dictionary object of the DataLayer class
+    """
+    function for loading the data from students.json, converting it to students class instances
+    and populating the instances into the students dictionary object of the DataLayer class
+    1. get data from file
+    2. loop over each item
+    3. loop over existing skills of each student
+        3.1 create instance of the skill
+        3.2 add skills to the existing skills dictionary
+    4. loop over desired skills of each student
+        3.1 create instance of the skill
+        3.2 add skills to the desired skills dictionary
+    5. create instance of the student using data from the json file
+    6. add dictionaries with the skills to the instance
+    7. add each student to the dictionary
+    """
     @staticmethod
     def load_dict_from_file():
+        temp = {}
+        temp_ex_skills = {}
+        temp_des_skills = {}
         try:
             with open('.\\data\\students.json', 'r') as read_file:
-                if DataLayer.students is None:
-                    return "The dictionary does not exist"
-                else:
-                    DataLayer.students = json.load(read_file)
-                    return DataLayer.students
+                temp_stud = json.load(read_file)
+                for email, student in temp_stud.items():
+                    for skill_name, skill_value in student['existing_skills'].items():
+                        ex_skill = Skill(skill_value['skill_name'], skill_value['skill_level'])
+                        temp_ex_skills[skill_name] = {
+                            "skill_name": ex_skill.get_name(),
+                            "skill_level": ex_skill.get_level()
+                        }
+                        for des_skill_name, des_skill_value in student['desired_skills'].items():
+                            des_skill = Skill(des_skill_value['skill_name'], des_skill_value['skill_level'])
+                            temp_des_skills[des_skill_name] = {
+                                "skill_name": des_skill.get_name(),
+                                "skill_level": des_skill.get_level()
+                            }
+                    stud = Student.from_file(student['id'], student['first_name'], student['last_name'],
+                                             student['email'], student['password'], student['creation_time'],
+                                             student['update_time'], temp_ex_skills,
+                                             temp_des_skills)
+
+                    DataLayer.students[email] = {
+                        "id": stud.get_id(),
+                        "first_name": stud.get_first_name(),
+                        "last_name": stud.get_last_name(),
+                        "email": stud.get_email(),
+                        "password": stud.get_password(),
+                        "creation_time": stud.get_creation_time(),
+                        "update_time": stud.get_update_time(),
+                        "existing_skills": stud._existing_skills,
+                        "desired_skills": stud._desired_skills,
+                    }
+            return DataLayer.students
         except FileNotFoundError:
             return "File not found"
 
