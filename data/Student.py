@@ -36,10 +36,22 @@ class Student(Person, dict):
         return self._update_time
 
     def get_existing_skills(self):
-        return self._existing_skills
+        ex_skills = {}
+        for skill in self._existing_skills:
+            ex_skills[skill.name] = {
+                "skill_name": skill.get_name(),
+                "skill_level": skill.get_level()
+            }
+        return ex_skills
 
     def get_desired_skills(self):
-        return self._desired_skills
+        des_skills = {}
+        for skill in self._desired_skills:
+            des_skills[skill.name] = {
+                "skill_name": skill.get_name(),
+                "skill_level": skill.get_level()
+            }
+        return des_skills
 
     def set_first_name(self, new_first_name):
         self._first_name = new_first_name
@@ -52,6 +64,9 @@ class Student(Person, dict):
 
     def set_password(self, new_password):
         self.__password = new_password
+
+    def set_update_date(self, new_date):
+        self._update_time = new_date
 
     def __str__(self):
         return json.dumps(self.__dict__)
@@ -86,7 +101,6 @@ class Student(Person, dict):
             return False
         else:
             return True
-
 
     def validate_login_student(self):
         if Validator.validate_field(self._email) is False:

@@ -51,7 +51,7 @@ def get_desirable_skill():
 
 
 # get count for how many students have each type of skill
-@app.route('/skills')
+@app.route('/skills/acquire')
 def get_existing_skills():
     skill = request.args.get('skill')
     return DataLayer.get_existing_skill(skill)
@@ -160,7 +160,7 @@ def persist_dict_to_file():
 
 # load dictionary from a file
 @app.route('/load_dictionary')
-def persist_data_to_file():
+def load_dict_from_file():
     DataLayer.load_dict_from_file()
     return "Success"
 
