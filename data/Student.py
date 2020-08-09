@@ -33,9 +33,9 @@ class Student(Person, dict):
     def get_existing_skills(self):
         ex_skills = {}
         for skill in self._existing_skills:
-             ex_skills[skill.name] = {
-                "skill_name": skill.get_name(),
-                "skill_level": skill.get_level()
+            ex_skills[skill.name] = {
+               "skill_name": skill.name,
+               "skill_level": skill.level
             }
         return ex_skills
 
@@ -64,8 +64,6 @@ class Student(Person, dict):
 
     @classmethod
     def from_json(cls, email, first_name, last_name, existing_skills, desired_skills):
-        existing_skills = []
-        desired_skills = []
         creation_time = datetime.now().__str__()[:-7]
         update_time = datetime.now().__str__()[:-7]
         new_student = cls(email, first_name, last_name, creation_time, update_time, existing_skills,

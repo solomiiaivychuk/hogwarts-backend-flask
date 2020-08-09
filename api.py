@@ -3,9 +3,8 @@ from flask_cors import CORS, cross_origin
 from data.Student import Student
 from data.DataLayer import DataLayer
 from data.Skill import Skill
-from data.Professor import Professor
+from data.Admin import Admin
 import json
-
 
 app = Flask(__name__)
 cors = CORS(app)
@@ -16,6 +15,41 @@ cors = CORS(app)
 def load_data_from_file():
     return DataLayer.load_dict_from_file()
 """
+
+
+@app.route('/signup', methods=["POST"])
+@cross_origin()
+def sign_up_admin():
+    content = request.json
+    admin = Admin(content['email'], content['password'])
+    DataLayer.add_new_admin(admin)
+    response = app.response_class(
+        response={json.dumps(admin.__dict__)},
+        status=200,
+        mimetype='application/json'
+    )
+    return response
+
+
+@app.route('/login', methods=["POST"])
+@cross_origin()
+def login_admin():
+    content = request.json
+    email = content['email']
+    password = content['password']
+    if email in DataLayer.admins:
+        if password == DataLayer.admins[email].get_password():
+            response = app.response_class(
+                response={json.dumps("Logged in successfully")},
+                status=200,
+                mimetype='application/json'
+            )
+            return response
+        else:
+            return "Wrong password"
+    else:
+        return "The admin with this email does not exist"
+
 
 # get list of all students
 @app.route('/students')

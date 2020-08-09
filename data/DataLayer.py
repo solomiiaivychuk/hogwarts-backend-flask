@@ -7,6 +7,16 @@ from data.Skill import Skill
 
 class DataLayer:
     students = {}
+    admins = {}
+
+    @staticmethod
+    def add_new_admin(admin):
+        if admin is None:
+            return "No student to add"
+        elif admin.get_email() in DataLayer.students:
+            return "The student with this email exists"
+        else:
+            DataLayer.admins[admin.get_email()] = admin
 
     # function for receiving all students within the dictionary
     @staticmethod
@@ -24,8 +34,8 @@ class DataLayer:
                     "last_name": student.get_last_name(),
                     "creation_time": student.get_creation_time(),
                     "update_time": student.get_update_time(),
-                    "existing_skills": student.get_existing_skills(),
-                    "desired_skills": student.get_desired_skills(),
+                    "existing_skills": student._existing_skills,
+                    "desired_skills": student._desired_skills,
                 }
             return temp
 
