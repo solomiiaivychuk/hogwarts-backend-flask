@@ -19,11 +19,9 @@ class DataLayer:
         else:
             for email, student in DataLayer.students.items():
                 temp[email] = {
-                    "id": student.get_id(),
+                    "email": student.get_email(),
                     "first_name": student.get_first_name(),
                     "last_name": student.get_last_name(),
-                    "email": student.get_email(),
-                    "password": student.get_password(),
                     "creation_time": student.get_creation_time(),
                     "update_time": student.get_update_time(),
                     "existing_skills": student.get_existing_skills(),
@@ -56,7 +54,7 @@ class DataLayer:
             return "The student with this email exists"
         else:
             DataLayer.students[student.get_email()] = student
-            print(DataLayer.students)
+            print(student)
 
     @staticmethod
     def add_skill(student, skill):
@@ -129,8 +127,7 @@ class DataLayer:
                         for des_skill_name, des_skill_value in student['desired_skills'].items():
                             des_skill = Skill(des_skill_value['skill_name'], des_skill_value['skill_level'])
                             temp_des_skills[des_skill_name] = {
-                                "skill_name": des_skill.get_name(),
-                                "skill_level": des_skill.get_level()
+                                "skill_name": des_skill.get_name()
                             }
                     stud = Student.from_file(student['id'], student['first_name'], student['last_name'],
                                              student['email'], student['password'], student['creation_time'],

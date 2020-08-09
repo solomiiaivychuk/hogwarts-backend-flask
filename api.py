@@ -1,32 +1,39 @@
 from flask import Flask, request
+from flask_cors import CORS, cross_origin
 from data.Student import Student
 from data.DataLayer import DataLayer
 from data.Skill import Skill
 from data.Professor import Professor
 import json
 
+
 app = Flask(__name__)
+cors = CORS(app)
 
-
+"""
 # load dictionary from a file
 @app.before_first_request
 def load_data_from_file():
     return DataLayer.load_dict_from_file()
+"""
 
 # get list of all students
 @app.route('/students')
+@cross_origin()
 def get_all_students():
     return DataLayer.get_students_as_json()
 
 
 # get student by email - email will be a path param
 @app.route('/students/<email>')
+@cross_origin()
 def get_students_by_email(email):
     return DataLayer.get_student_by_email(email)
 
 
 # get added students per day of the year - day will be a query param
 @app.route('/students/date')
+@cross_origin()
 def get_students_added_on_date():
     creation_year = request.args.get('year')
     creation_month = request.args.get('month')
@@ -44,6 +51,7 @@ def get_students_added_on_date():
 
 # get count of desired skills (how many of the students desire a specific skill)
 @app.route('/skills/wish')
+@cross_origin()
 def get_desirable_skill():
     skill = request.args.get('skill')
     return DataLayer.get_desired_skill(skill)
@@ -51,6 +59,7 @@ def get_desirable_skill():
 
 # get count for how many students have each type of skill
 @app.route('/skills/acquire')
+@cross_origin()
 def get_existing_skills():
     skill = request.args.get('skill')
     return DataLayer.get_existing_skill(skill)
@@ -58,10 +67,11 @@ def get_existing_skills():
 
 # add a new student (request which will be invoked by admin) - the route will receive a json with the student fields.
 @app.route('/students', methods=['POST'])
+@cross_origin()
 def add_new_student():
     content = request.json
-    student = Student.from_json(content['id_num'], content['first_name'], content['last_name'], content['email'],
-                                content['password'])
+    student = Student.from_json(content['email'], content['first_name'], content['last_name'],
+                                content['existing_skills'], content['desired_skills'])
     if student is None:
         return "Please make sure that all fields are filled"
     if student._email in DataLayer.students:
@@ -78,6 +88,7 @@ def add_new_student():
 
 # login a student(email + password) - the route will receive a json with the data.
 @app.route('/login', methods=['POST'])
+@cross_origin()
 def login_student():
     content = request.json
     email = content['email']
@@ -92,6 +103,7 @@ def login_student():
 
 
 @app.route('/skills', methods=['POST'])
+@cross_origin()
 def add_skill_to_student():
     content = request.json
     email = content["email"]
@@ -113,6 +125,7 @@ def add_skill_to_student():
 
 
 @app.route('/skills/wish', methods=['POST'])
+@cross_origin()
 def add_desired_skill_to_student():
     content = request.json
     email = content["email"]
@@ -136,6 +149,7 @@ def add_desired_skill_to_student():
 
 # edit student - the route will receive a json with the student fields.
 @app.route('/students', methods=['PUT'])
+@cross_origin()
 def edit_field():
     content = request.json
     email = content['email']
@@ -146,12 +160,14 @@ def edit_field():
 
 # delete a student
 @app.route('/students/<email>', methods=['DELETE'])
+@cross_origin()
 def delete_student(email):
     return DataLayer.remove_student(email)
 
 
 # persist dictionary to a file
 @app.route('/save_dictionary')
+@cross_origin()
 def persist_data_to_file():
     DataLayer.persist_dict_into_file()
     return "Success"
