@@ -77,9 +77,9 @@ class MongoDataLayer:
     #delete student by email
     def remove_student(self, email):
         try:
-            student = self.__collection.students.find({"email": email})
-            self.__collection.students.delete_one(student)
-            return student
+            print(email)
+            self.__db.students.delete_one(email)
+            return "Success"
         except FileNotFoundError:
             return "Student with this email does not exist in the database"
 

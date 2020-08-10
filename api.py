@@ -191,10 +191,11 @@ def edit_field():
 
 
 # delete a student
-@app.route('/students/<email>', methods=['DELETE'])
+@app.route('/students', methods=['DELETE'])
 @cross_origin()
-def delete_student(email):
-    return mongo_db.remove_student(email)
+def delete_student():
+    content = request.json
+    return mongo_db.remove_student(content)
 
 
 # persist dictionary to a file
