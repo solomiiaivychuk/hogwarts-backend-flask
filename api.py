@@ -106,14 +106,10 @@ def get_existing_skills():
 @cross_origin()
 def add_new_student():
     content = request.json
+    #print(content)
     student = Student.from_json(content['email'], content['first_name'], content['last_name'],
                                 content['existing_skills'], content['desired_skills'])
-    if student is None:
-        return "Please make sure that all fields are filled"
-    if student._email in DataLayer.students:
-        return "The student with this email already exists"
-    else:
-        DataLayer.add_student(student)
+    mongo_db.add_student(content)
     response = app.response_class(
         response={json.dumps(student.__dict__)},
         status=200,

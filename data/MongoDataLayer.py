@@ -57,7 +57,7 @@ class MongoDataLayer:
     #add student
     def add_student(self, data):
         try:
-            self.__collection.students.insert(data)
+            self.__db.students.insert(data)
             return "Success"
         except OSError:
             return "Error occured"
