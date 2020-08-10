@@ -1,4 +1,7 @@
 import pymongo
+from flask import json
+from data.Student import Student
+
 
 class MongoDataLayer:
 
@@ -7,18 +10,49 @@ class MongoDataLayer:
         self.__db = self.__client.hogwarts
         self.__collection = self.__db.students
 
-    def __inti__(self):
-        self.create()
+    def __init__(self):
+        self.__create()
 
-    #get all students from database
+    #get all students as dictionary
+    def get_students_as_dict(self):
+        students_dict = {}
+        students = self.__db.students.find()
+        for student in students:
+            students_dict[student["email"]] = {
+                "email": student["email"],
+                "first_name": student["first_name"],
+                "last_name": student["last_name"],
+                "existing_skills": student["existing_skills"],
+                "desired_skills": student["desired_skills"]
+            }
+        return students_dict
+
+    #get all students as json
     def get_students_as_json(self):
-        students = self.__collection.students.find()
-        return students
+        return json.dumps(self.get_students_as_dict())
+
 
     #get student by email
-    def get_student_by_email(self, email):
-        student = self.__collection.students.find({"email": email})
-        return student
+    def get_student_by_email(self, email_param):
+        student_dict = {}
+        data = self.__db.students.find({"email": email_param})
+        email = ''
+        first_name = ''
+        last_name = ''
+        existing_skills = []
+        desired_skills = []
+
+        for property in data:
+            student_dict[property["email"]] = {
+                "email": property['email'],
+                "first_name": property["first_name"],
+                "last_name": property["last_name"],
+                "existing_skills": property["existing_skills"],
+                "desired_skills": property["desired_skills"],
+            }
+        student = Student.from_json(email, first_name, last_name, existing_skills, desired_skills)
+        print(student)
+        return json.dumps(student_dict)
 
     #add student
     def add_student(self, data):

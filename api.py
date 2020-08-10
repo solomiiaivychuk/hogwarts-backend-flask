@@ -4,6 +4,7 @@ from data.Student import Student
 from data.DataLayer import DataLayer
 from data.Skill import Skill
 from data.Admin import Admin
+from data.MongoDataLayer import MongoDataLayer
 import json
 
 app = Flask(__name__)
@@ -16,6 +17,7 @@ def load_data_from_file():
     return DataLayer.load_dict_from_file()
 """
 
+mongo_db = MongoDataLayer()
 
 @app.route('/signup', methods=["POST"])
 @cross_origin()
@@ -55,14 +57,14 @@ def login_admin():
 @app.route('/students')
 @cross_origin()
 def get_all_students():
-    return DataLayer.get_students_as_json()
+    return mongo_db.get_students_as_json()
 
 
 # get student by email - email will be a path param
 @app.route('/students/<email>')
 @cross_origin()
 def get_students_by_email(email):
-    return DataLayer.get_student_by_email(email)
+    return mongo_db.get_student_by_email(email)
 
 
 # get added students per day of the year - day will be a query param
@@ -196,7 +198,7 @@ def edit_field():
 @app.route('/students/<email>', methods=['DELETE'])
 @cross_origin()
 def delete_student(email):
-    return DataLayer.remove_student(email)
+    return mongo_db.remove_student(email)
 
 
 # persist dictionary to a file
