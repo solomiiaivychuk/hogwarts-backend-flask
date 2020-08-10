@@ -192,3 +192,29 @@ class DataLayer:
                 if desired_skill == skill:
                     count += 1
         return str.format('{} students wish to have the skill "{}"', count, skill)
+
+
+"""
+DATALAYER
+@static
+def get_horses():
+horses = DataLayer.mongoDB.get_all_horses()
+return horses
+
+MONGODATALAYER
+import pymongo
+
+class M:
+  def __create(self):
+    self.__client = pymongo.MongoClient("localhost", 27017)
+    self.__db = self.__client['horses']
+    
+  def __init__(self):
+    self.__create()
+    
+  def get_all_horses(self):
+    horses_dict = {}
+    horses = self.__db["horses"].find()
+    for horse in horses:
+        horses_dict[horse["_id"]] = horse
+"""
