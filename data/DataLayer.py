@@ -34,8 +34,11 @@ class DataLayer:
     # function for removing a student from the students dictionary
     @staticmethod
     def remove_student(email):
-        mongo_db.remove_student(email)
-        return str.format("Deleted {} successfully", email)
+        try:
+            mongo_db.remove_student(email)
+            return str.format("Deleted {} successfully", email)
+        except OSError:
+            return "Cannot delete doc"
 
     # function for persisting all the students' class instances in the dictionary into a json file
     @staticmethod

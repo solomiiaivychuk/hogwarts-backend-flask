@@ -105,7 +105,6 @@ def get_existing_skills():
 @cross_origin()
 def add_new_student():
     content = request.json
-    #print(content)
     student = Student.from_json(content['email'], content['first_name'], content['last_name'],
                                 content['existing_skills'], content['desired_skills'])
     DataLayer.add_student(content)
@@ -132,6 +131,7 @@ def edit_field():
 @cross_origin()
 def delete_student():
     content = request.json
+    print(str.format("Deleting ", content))
     return DataLayer.remove_student(content)
 
 # persist dictionary to a file
