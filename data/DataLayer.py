@@ -122,3 +122,13 @@ class DataLayer:
         else:
             return "The email is not in the students database"
 
+    #how many students have specific skill
+    @staticmethod
+    def get_existing_skill(skill):
+        return mongo_db.get_existing_skill_mongo(skill)
+
+    #how many students have specific desired skill
+    @staticmethod
+    def get_desired_skill(skill):
+        return mongo_db.get_desired_skill_mongo(skill)
+

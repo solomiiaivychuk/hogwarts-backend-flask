@@ -93,12 +93,6 @@ def get_desirable_skill():
 
 
 # get count for how many students have each type of skill
-@app.route('/skills/acquire')
-@cross_origin()
-def get_existing_skills():
-    skill = request.args.get('skill')
-    return DataLayer.get_existing_skill(skill)
-
 
 # add a new student (request which will be invoked by admin) - the route will receive a json with the student fields.
 @app.route('/students', methods=['POST'])
@@ -141,10 +135,25 @@ def persist_data_to_file():
     DataLayer.persist_dict_into_file()
     return "Success"
 
+#how many students have specific skill
+@app.route('/existing_skills')
+@cross_origin()
+def get_existing_skill():
+    content = request.json
+    skill = content['skill']
+    return DataLayer.get_existing_skill(skill)
+
+
+#how many students have specific desired skill
+@app.route('/desired_skills')
+@cross_origin()
+def get_desired_skill():
+    content = request.json
+    skill = content['skill']
+    DataLayer.get_desired_skill(skill)
 
 if __name__ == '__main__':
     app.run()
-
 
 @atexit
 def exit_db():

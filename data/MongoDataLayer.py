@@ -77,7 +77,6 @@ class MongoDataLayer:
     #delete student by email
     def remove_student(self, email):
         try:
-            print(email)
             self.__db.students.delete_one(email)
             return "Success"
         except FileNotFoundError:
@@ -85,4 +84,22 @@ class MongoDataLayer:
 
     def shutdown(self):
         self.__client.close()
+
+    #how many students have specific skill
+    def get_existing_skill_mongo(self, skill):
+        pipeline = [{"$match": {"existing_skills.name": skill}}, {"$count": "num_of_students"}]
+        value = list(self.__db.students.aggregate(pipeline))
+        response = ''
+        for prop in value:
+            response = prop
+        return json.dumps(response)
+
+        # how many students have specific skill
+
+    def get_desired_skill_mongo(self, skill):
+        pipeline = [{"$match": {"desired_skills.name": skill}}, {"$count": "num_of_students"}]
+        value = list(self.__db.students.aggregate(pipeline))
+        for prop in value:
+            print(prop)
+            return json.dumps(prop)
 
