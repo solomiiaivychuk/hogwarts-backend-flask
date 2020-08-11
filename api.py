@@ -4,8 +4,8 @@ from data.Student import Student
 from data.DataLayer import DataLayer
 from data.Skill import Skill
 from data.Admin import Admin
-from data.MongoDataLayer import MongoDataLayer
 import json
+import atexit
 
 app = Flask(__name__)
 cors = CORS(app)
@@ -17,7 +17,6 @@ def load_data_from_file():
     return DataLayer.load_dict_from_file()
 """
 
-mongo_db = MongoDataLayer()
 
 @app.route('/signup', methods=["POST"])
 @cross_origin()
@@ -57,14 +56,14 @@ def login_admin():
 @app.route('/students')
 @cross_origin()
 def get_all_students():
-    return mongo_db.get_students_as_json()
+    return DataLayer.get_students_as_json()
 
 
 # get student by email - email will be a path param
 @app.route('/students/<email>')
 @cross_origin()
 def get_students_by_email(email):
-    return mongo_db.get_student_by_email(email)
+    return DataLayer.get_student_by_email(email)
 
 
 # get added students per day of the year - day will be a query param
@@ -109,75 +108,13 @@ def add_new_student():
     #print(content)
     student = Student.from_json(content['email'], content['first_name'], content['last_name'],
                                 content['existing_skills'], content['desired_skills'])
-    mongo_db.add_student(content)
+    DataLayer.add_student(content)
     response = app.response_class(
         response={json.dumps(student.__dict__)},
         status=200,
         mimetype='application/json'
     )
     return response
-
-
-# login a student(email + password) - the route will receive a json with the data.
-@app.route('/login', methods=['POST'])
-@cross_origin()
-def login_student():
-    content = request.json
-    email = content['email']
-    password = content['password']
-    if email in DataLayer.students:
-        if password == DataLayer.students[email].get_password():
-            return "Logged in successfully"
-        else:
-            return "Wrong password"
-    else:
-        return "The email is not in the students database"
-
-
-@app.route('/skills', methods=['POST'])
-@cross_origin()
-def add_skill_to_student():
-    content = request.json
-    email = content["email"]
-    skill_name = content["skill"]
-    skill_level = content["level"]
-    skill = Skill(skill_name, skill_level)
-    if email in DataLayer.students:
-        DataLayer.add_skill(DataLayer.students[email], skill)
-        student_name = DataLayer.students[email].get_first_name() + " " + DataLayer.students[email].get_last_name()
-        response = app.response_class(
-            response={
-                str.format("Student {} acquired new skill {} on a level {}", student_name, skill.name, skill.level)},
-            status=200,
-            mimetype='application/json'
-        )
-        return response
-    else:
-        return "There is no student with this email"
-
-
-@app.route('/skills/wish', methods=['POST'])
-@cross_origin()
-def add_desired_skill_to_student():
-    content = request.json
-    email = content["email"]
-    skill_name = content["skill"]
-    skill_level = content["level"]
-    skill = Skill(skill_name, skill_level)
-    if email in DataLayer.students:
-        DataLayer.desire_skill(DataLayer.students[email], skill)
-        student_name = DataLayer.students[email].get_first_name() + " " + DataLayer.students[email].get_last_name()
-        response = app.response_class(
-            response={
-                str.format("Student {} wishes to acquire new skill {} on a level {}", student_name, skill.name,
-                           skill.level)},
-            status=200,
-            mimetype='application/json'
-        )
-        return response
-    else:
-        return "There is no student with this email"
-
 
 # edit student - the route will receive a json with the student fields.
 @app.route('/students', methods=['PUT'])
@@ -195,8 +132,7 @@ def edit_field():
 @cross_origin()
 def delete_student():
     content = request.json
-    return mongo_db.remove_student(content)
-
+    return DataLayer.remove_student(content)
 
 # persist dictionary to a file
 @app.route('/save_dictionary')
@@ -208,3 +144,8 @@ def persist_data_to_file():
 
 if __name__ == '__main__':
     app.run()
+
+
+@atexit
+def exit_db():
+    DataLayer.shutdown()

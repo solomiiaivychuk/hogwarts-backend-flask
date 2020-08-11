@@ -83,4 +83,6 @@ class MongoDataLayer:
         except FileNotFoundError:
             return "Student with this email does not exist in the database"
 
+    def shutdown(self):
+        self.__client.close()
 

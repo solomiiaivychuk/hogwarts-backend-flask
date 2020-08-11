@@ -1,95 +1,41 @@
 import json
 from datetime import datetime
-
+from data.MongoDataLayer import MongoDataLayer
 from data.Student import Student
 from data.Skill import Skill
 
+mongo_db = MongoDataLayer()
+
 
 class DataLayer:
-    students = {}
-    admins = {}
-
-    @staticmethod
-    def add_new_admin(admin):
-        if admin is None:
-            return "No student to add"
-        elif admin.get_email() in DataLayer.students:
-            return "The student with this email exists"
-        else:
-            DataLayer.admins[admin.get_email()] = admin
 
     # function for receiving all students within the dictionary
     @staticmethod
     def get_students_as_dict():
-        temp = {}
-        if DataLayer.students is None:
-            return "The list of students does not exist"
-        if len(DataLayer.students) == 0:
-            return "The list of students is empty"
-        else:
-            for email, student in DataLayer.students.items():
-                temp[email] = {
-                    "email": student.get_email(),
-                    "first_name": student.get_first_name(),
-                    "last_name": student.get_last_name(),
-                    "creation_time": student.get_creation_time(),
-                    "update_time": student.get_update_time(),
-                    "existing_skills": student._existing_skills,
-                    "desired_skills": student._desired_skills,
-                }
-            return temp
+        return mongo_db.get_students_as_dict()
 
     # function for receiving all students within the dictionary as json strings. The function will call
     # the previous function and afterwards convert the returned data to be a list of json strings
     @staticmethod
     def get_students_as_json():
-        return json.dumps(DataLayer.get_students_as_dict())
+        return mongo_db.get_students_as_json()
 
     # function for getting a specific student from the dictionary by its email.
     @staticmethod
     def get_student_by_email(email):
-        if email not in DataLayer.students:
-            return "The student with this email does not exist"
-        else:
-            for key, student in DataLayer.students.items():
-                if student.get_email() == email:
-                    return student.__str__()
+        return mongo_db.get_student_by_email(email)
 
     # function for setting a specific student to the dictionary by its email
     @staticmethod
     def add_student(student):
-        if student is None:
-            return "No student to add"
-        elif student.get_email() in DataLayer.students:
-            return "The student with this email exists"
-        else:
-            DataLayer.students[student.get_email()] = student
-            print(student)
-
-    @staticmethod
-    def add_skill(student, skill):
-        if student.get_email() not in DataLayer.students.keys():
-            return "The student with this email does not exist in the database"
-        else:
-            student._update_time = datetime.now().__str__()[:-7]
-            DataLayer.students[student.get_email()].append_skill(skill)
-
-    @staticmethod
-    def desire_skill(student, skill):
-        if student.get_email() not in DataLayer.students.keys():
-            return "The student with this email does not exist in the database"
-        else:
-            student._update_time = datetime.now().__str__()[:-7]
-            DataLayer.students[student.get_email()].wish_skill(skill)
+        mongo_db.add_student(student)
+        return "Added student successfully"
 
     # function for removing a student from the students dictionary
     @staticmethod
     def remove_student(email):
-        if email not in DataLayer.students.keys():
-            return "The student with this email does not exist in the database"
-        else:
-            DataLayer.students.pop(email)
-            return str.format("Deleted {} successfully", email)
+        mongo_db.remove_student(email)
+        return str.format("Deleted {} successfully", email)
 
     # function for persisting all the students' class instances in the dictionary into a json file
     @staticmethod
@@ -173,48 +119,3 @@ class DataLayer:
         else:
             return "The email is not in the students database"
 
-# get count for how many students have each type of skill
-    @staticmethod
-    def get_existing_skill(skill):
-        count = 0
-        for key, student in DataLayer.students.items():
-            for existing_skill in student.get_existing_skills():
-                if existing_skill == skill:
-                    count += 1
-        return str.format('{} students have the skill "{}"', count, skill)
-
-# get count of desired skills (how many of the students desire a specific skill)
-    @staticmethod
-    def get_desired_skill(skill):
-        count = 0
-        for key, student in DataLayer.students.items():
-            for desired_skill in student.get_desired_skills():
-                if desired_skill == skill:
-                    count += 1
-        return str.format('{} students wish to have the skill "{}"', count, skill)
-
-
-"""
-DATALAYER
-@static
-def get_horses():
-horses = DataLayer.mongoDB.get_all_horses()
-return horses
-
-MONGODATALAYER
-import pymongo
-
-class M:
-  def __create(self):
-    self.__client = pymongo.MongoClient("localhost", 27017)
-    self.__db = self.__client['horses']
-    
-  def __init__(self):
-    self.__create()
-    
-  def get_all_horses(self):
-    horses_dict = {}
-    horses = self.__db["horses"].find()
-    for horse in horses:
-        horses_dict[horse["_id"]] = horse
-"""
