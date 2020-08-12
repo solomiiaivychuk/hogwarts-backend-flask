@@ -5,13 +5,16 @@ from data.Student import Student
 
 class MongoDataLayer:
 
-    def __create(self):
+    def create(self):
         self.__client = pymongo.MongoClient("localhost", 27017)
         self.__db = self.__client.hogwarts
         self.__collection = self.__db.students
 
+    def close(self):
+        self.__client.close()
+
     def __init__(self):
-        self.__create()
+        self.create()
 
     #get all students as dictionary
     def get_students_as_dict(self):

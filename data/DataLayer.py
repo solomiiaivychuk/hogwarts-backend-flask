@@ -3,11 +3,25 @@ from datetime import datetime
 from data.MongoDataLayer import MongoDataLayer
 from data.Student import Student
 from data.Skill import Skill
+from data.SqlDataLayer import SqlDataLayer
 
 mongo_db = MongoDataLayer()
+sql_db = SqlDataLayer()
 
 
 class DataLayer:
+
+    @staticmethod
+    def get_admins():
+        return sql_db.get_admins()
+
+    @staticmethod
+    def get_students():
+        return sql_db.get_students()
+
+    @staticmethod
+    def add_student_sql(student_id, email, first_name, last_name):
+        return sql_db.add_student(student_id, email, first_name, last_name)
 
     # function for receiving all students within the dictionary
     @staticmethod
@@ -28,7 +42,7 @@ class DataLayer:
     # function for setting a specific student to the dictionary by its email
     @staticmethod
     def add_student(student):
-        mongo_db.add_student(student)
+        #mongo_db.add_student(student)
         return "Added student successfully"
 
     # function for removing a student from the students dictionary

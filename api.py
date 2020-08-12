@@ -9,7 +9,7 @@ import atexit
 
 app = Flask(__name__)
 cors = CORS(app)
-
+data_layer = DataLayer()
 """
 # load dictionary from a file
 @app.before_first_request
@@ -51,13 +51,13 @@ def login_admin():
     else:
         return "The admin with this email does not exist"
 
-
+"""
 # get list of all students
 @app.route('/students')
 @cross_origin()
 def get_all_students():
     return DataLayer.get_students_as_json()
-
+"""
 
 # get student by email - email will be a path param
 @app.route('/students/<email>')
@@ -93,7 +93,7 @@ def get_desirable_skill():
 
 
 # get count for how many students have each type of skill
-
+"""
 # add a new student (request which will be invoked by admin) - the route will receive a json with the student fields.
 @app.route('/students', methods=['POST'])
 @cross_origin()
@@ -108,7 +108,7 @@ def add_new_student():
         mimetype='application/json'
     )
     return response
-
+"""
 # edit student - the route will receive a json with the student fields.
 @app.route('/students', methods=['PUT'])
 @cross_origin()
@@ -152,9 +152,45 @@ def get_desired_skill():
     skill = content['skill']
     DataLayer.get_desired_skill(skill)
 
+
+@app.route("/admins")
+def get_admins():
+    admins = DataLayer.get_admins()
+    response = app.response_class(
+        response=json.dumps(admins),
+        status=200,
+        mimetype="application.json"
+    )
+    return response
+
+@app.route("/students")
+def get_students():
+    students = DataLayer.get_students()
+    response = app.response_class(
+        response=json.dumps(students),
+        status=200,
+        mimetype="application/json"
+    )
+    return response
+
+@app.route("/students", methods=["POST"])
+def add_student():
+    st_id = ""
+    email = "sdl@email.com"
+    f_name = "Name"
+    l_name = "Surname"
+    DataLayer.add_student_sql(st_id, email, f_name, l_name)
+    response = app.response_class(
+        response={json.dumps("Success")},
+        status=200,
+        mimetype='application/json'
+    )
+    return response
+
 if __name__ == '__main__':
     app.run()
 
 @atexit
 def exit_db():
     DataLayer.shutdown()
+
