@@ -17,15 +17,14 @@ if config("DATABASE") == "Mysql":
 elif config("DATABASE") == "MongoDB":
     data_layer = MongoDataLayer()
 
-"""
+
 @app.route('/signup', methods=["POST"])
 @cross_origin()
 def sign_up_admin():
     content = request.json
-    admin = Admin(content['email'], content['password'])
-    data_layer.add_new_admin(admin)
+    data_layer.add_admin(content)
     response = app.response_class(
-        response={json.dumps(admin.__dict__)},
+        response={json.dumps("Success")},
         status=200,
         mimetype='application/json'
     )
@@ -36,24 +35,18 @@ def sign_up_admin():
 @cross_origin()
 def login_admin():
     content = request.json
-    email = content['email']
-    password = content['password']
-    if email in DataLayer.admins:
-        if password == DataLayer.admins[email].get_password():
-            response = app.response_class(
-                response={json.dumps("Logged in successfully")},
-                status=200,
-                mimetype='application/json'
-            )
-            return response
-        else:
-            return "Wrong password"
-    else:
-        return "The admin with this email does not exist"
-"""
+    print(content)
+    data_layer.login_admin(content)
+    response = app.response_class(
+        response=json.dumps("success"),
+        status=200,
+        mimetype='application/json'
+    )
+    return response
 
 # get list of all students
 @app.route('/students')
+@cross_origin()
 def get_students():
     students = data_layer.get_students()
     response = app.response_class(
@@ -97,23 +90,20 @@ def get_desirable_skill():
     return DataLayer.get_desired_skill(skill)
 
 
-# get count for how many students have each type of skill
-"""
+
 # add a new student (request which will be invoked by admin) - the route will receive a json with the student fields.
 @app.route('/students', methods=['POST'])
 @cross_origin()
 def add_new_student():
     content = request.json
-    student = Student.from_json(content['email'], content['first_name'], content['last_name'],
-                                content['existing_skills'], content['desired_skills'])
-    DataLayer.add_student(content)
+    data_layer.add_student(content)
     response = app.response_class(
-        response={json.dumps(student.__dict__)},
+        response={json.dumps("Success")},
         status=200,
         mimetype='application/json'
     )
     return response
-"""
+
 # edit student - the route will receive a json with the student fields.
 @app.route('/students', methods=['PUT'])
 @cross_origin()
@@ -146,7 +136,7 @@ def persist_data_to_file():
 def get_existing_skill():
     content = request.json
     skill = content['skill']
-    return DataLayer.get_existing_skill(skill)
+    return data_layer.get_students_having_specific_skill(skill)
 
 
 #how many students have specific desired skill
@@ -159,26 +149,13 @@ def get_desired_skill():
 
 
 @app.route("/admins")
+@cross_origin()
 def get_admins():
     admins = data_layer.get_admins()
     response = app.response_class(
         response=json.dumps(admins),
         status=200,
         mimetype="application.json"
-    )
-    return response
-
-@app.route("/students", methods=["POST"])
-def add_student():
-    id = 8989
-    email = "sdlewew@email.com"
-    f_name = "Name"
-    l_name = "Surname"
-    data_layer.add_student(id, email, f_name, l_name)
-    response = app.response_class(
-        response={json.dumps("Success")},
-        status=200,
-        mimetype='application/json'
     )
     return response
 

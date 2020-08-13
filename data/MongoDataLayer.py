@@ -9,7 +9,8 @@ class MongoDataLayer(DataLayer):
     def __connect(self):
         self.__client = pymongo.MongoClient("localhost", 27017)
         self.__db = self.__client.hogwarts
-        self.__collection = self.__db.students
+        self.__stud_collection = self.__db.students
+        self.__adm_collection = self.__db.admins
 
     def close(self):
         self.__client.close()
@@ -17,6 +18,21 @@ class MongoDataLayer(DataLayer):
     def __init__(self):
         super().__init__()
         self.__connect()
+
+    def add_admin(self, data):
+        try:
+            self.__db.admins.insert(data)
+        except Exception as e:
+            return e
+
+    def login_admin(self, data):
+        email = data['email']
+        password = data['password']
+        try:
+            self.__db.admins.find({"email": email, "password": password})
+        except Exception as e:
+            print(e)
+
 
     #get all students as dictionary
     def get_students_as_dict(self):
@@ -91,7 +107,7 @@ class MongoDataLayer(DataLayer):
         self.__client.close()
 
     #how many students have specific skill
-    def get_existing_skill_mongo(self, skill):
+    def get_students_having_specific_skill(self, skill):
         pipeline = [{"$match": {"existing_skills.name": skill}}, {"$count": "num_of_students"}]
         value = list(self.__db.students.aggregate(pipeline))
         response = ''

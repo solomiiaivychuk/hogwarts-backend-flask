@@ -10,13 +10,16 @@ class DataLayer:
     def close(self):
         pass
 
+    def add_admin(self, data):
+        pass
+
     def get_admins(self):
         pass
 
     def get_students(self):
         pass
 
-    def add_student(self, val1, val2, val3, val4):
+    def add_student(self, data):
         pass
 
     def get_students_as_json(self):
@@ -26,6 +29,9 @@ class DataLayer:
         pass
 
     def remove_student(self, email):
+        pass
+
+    def get_students_having_specific_skill(self, skill):
         pass
 
     def persist_dict_into_file(self):
