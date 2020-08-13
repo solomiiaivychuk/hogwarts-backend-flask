@@ -1,14 +1,17 @@
 import mysql.connector
 from decouple import config
-from werkzeug.debug import console
+from flask import json
+
+from data.DataLayer import DataLayer
 
 
-class SqlDataLayer:
+class SqlDataLayer(DataLayer):
 
     def __init__(self):
-        self.create()
+        super().__init__()
+        self.__connect()
 
-    def create(self):
+    def __connect(self):
         try:
             self.__sqlDb = mysql.connector.connect(
                 host="127.0.0.1",
@@ -23,8 +26,8 @@ class SqlDataLayer:
         self.__sqlDb.close()
 
     def get_admins(self):
+        cursor = self.__sqlDb.cursor()
         try:
-            cursor = self.__sqlDb.cursor()
             results = []
             sql = "SELECT * FROM admins"
             cursor.execute(sql)
@@ -35,8 +38,8 @@ class SqlDataLayer:
             cursor.close()
 
     def get_students(self):
+        cursor = self.__sqlDb.cursor()
         try:
-            cursor = self.__sqlDb.cursor()
             results = []
             sql = "SELECT * FROM students"
             cursor.execute(sql)
@@ -47,12 +50,13 @@ class SqlDataLayer:
             cursor.close()
 
     def add_student(self, id, email, first_name, last_name):
+        cursor = self.__sqlDb.cursor()
         try:
-            cursor = self.__sqlDb.cursor()
             self.__sqlDb.start_transaction()
             sql = "INSERT INTO students (id, email, first_name, last_name) VALUES (%s, %s, %s, %s)"
             value = (id, email, first_name, last_name)
             cursor.execute(sql, value)
+            self.__sqlDb.commit()
             print(cursor.rowcount, "Inserted successfully")
             return cursor.rowcount
         finally:

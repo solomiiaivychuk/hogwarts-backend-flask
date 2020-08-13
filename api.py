@@ -6,24 +6,24 @@ from data.Skill import Skill
 from data.Admin import Admin
 import json
 import atexit
+from decouple import config
+from data.SqlDataLayer import SqlDataLayer
+from data.MongoDataLayer import MongoDataLayer
 
 app = Flask(__name__)
 cors = CORS(app)
-data_layer = DataLayer()
-"""
-# load dictionary from a file
-@app.before_first_request
-def load_data_from_file():
-    return DataLayer.load_dict_from_file()
-"""
+if config("DATABASE") == "Mysql":
+    data_layer = SqlDataLayer()
+elif config("DATABASE") == "MongoDB":
+    data_layer = MongoDataLayer()
 
-
+"""
 @app.route('/signup', methods=["POST"])
 @cross_origin()
 def sign_up_admin():
     content = request.json
     admin = Admin(content['email'], content['password'])
-    DataLayer.add_new_admin(admin)
+    data_layer.add_new_admin(admin)
     response = app.response_class(
         response={json.dumps(admin.__dict__)},
         status=200,
@@ -50,14 +50,19 @@ def login_admin():
             return "Wrong password"
     else:
         return "The admin with this email does not exist"
-
 """
+
 # get list of all students
 @app.route('/students')
-@cross_origin()
-def get_all_students():
-    return DataLayer.get_students_as_json()
-"""
+def get_students():
+    students = data_layer.get_students()
+    response = app.response_class(
+        response=json.dumps(students),
+        status=200,
+        mimetype="application.json"
+    )
+    return response
+
 
 # get student by email - email will be a path param
 @app.route('/students/<email>')
@@ -155,7 +160,7 @@ def get_desired_skill():
 
 @app.route("/admins")
 def get_admins():
-    admins = DataLayer.get_admins()
+    admins = data_layer.get_admins()
     response = app.response_class(
         response=json.dumps(admins),
         status=200,
@@ -163,23 +168,13 @@ def get_admins():
     )
     return response
 
-@app.route("/students")
-def get_students():
-    students = DataLayer.get_students()
-    response = app.response_class(
-        response=json.dumps(students),
-        status=200,
-        mimetype="application/json"
-    )
-    return response
-
 @app.route("/students", methods=["POST"])
 def add_student():
-    st_id = ""
-    email = "sdl@email.com"
+    id = 8989
+    email = "sdlewew@email.com"
     f_name = "Name"
     l_name = "Surname"
-    DataLayer.add_student_sql(st_id, email, f_name, l_name)
+    data_layer.add_student(id, email, f_name, l_name)
     response = app.response_class(
         response={json.dumps("Success")},
         status=200,

@@ -1,11 +1,12 @@
 import pymongo
 from flask import json
 from data.Student import Student
+from data.DataLayer import DataLayer
 
 
-class MongoDataLayer:
+class MongoDataLayer(DataLayer):
 
-    def create(self):
+    def __connect(self):
         self.__client = pymongo.MongoClient("localhost", 27017)
         self.__db = self.__client.hogwarts
         self.__collection = self.__db.students
@@ -14,7 +15,8 @@ class MongoDataLayer:
         self.__client.close()
 
     def __init__(self):
-        self.create()
+        super().__init__()
+        self.__connect()
 
     #get all students as dictionary
     def get_students_as_dict(self):
@@ -31,8 +33,8 @@ class MongoDataLayer:
         return students_dict
 
     #get all students as json
-    def get_students_as_json(self):
-        return json.dumps(self.get_students_as_dict())
+    def get_students(self):
+        return self.get_students_as_dict()
 
 
     #get student by email
