@@ -60,7 +60,7 @@ def get_students():
 @app.route('/students/<email>')
 @cross_origin()
 def get_students_by_email(email):
-    return DataLayer.get_student_by_email(email)
+    return data_layer.get_student_by_email(email)
 
 
 # get added students per day of the year - day will be a query param
@@ -71,23 +71,8 @@ def get_students_added_on_date():
     creation_month = request.args.get('month')
     creation_day = request.args.get('day')
     response = []
-    for student in DataLayer.students.values():
-        if creation_year == student._creation_time[:4] and \
-                creation_month == student._creation_time[5:7] and \
-                creation_day == student._creation_time[8:10]:
-            response.append(student.__dict__)
-        else:
-            response = str.format("No students were added on {}-{}-{}", creation_year, creation_month, creation_day)
+    """"""
     return json.dumps(response)
-
-
-# get count of desired skills (how many of the students desire a specific skill)
-@app.route('/skills/wish')
-@cross_origin()
-def get_desirable_skill():
-    skill = request.args.get('skill')
-    return DataLayer.get_desired_skill(skill)
-
 
 
 # add a new student (request which will be invoked by admin) - the route will receive a json with the student fields.
@@ -111,7 +96,7 @@ def edit_field():
     email = content['email']
     field = content['field']
     value = content['value']
-    return DataLayer.edit_student(email, field, value)
+    return data_layer.edit_student(email, field, value)
 
 
 # delete a student
@@ -126,7 +111,7 @@ def remove_student():
 @app.route('/save_dictionary')
 @cross_origin()
 def persist_data_to_file():
-    DataLayer.persist_dict_into_file()
+    data_layer.persist_dict_into_file()
     return "Success"
 
 #how many students have specific skill
@@ -144,7 +129,7 @@ def get_existing_skill():
 def get_desired_skill():
     content = request.json
     skill = content['skill']
-    DataLayer.get_desired_skill(skill)
+    return data_layer.get_desired_skill(skill)
 
 
 @app.route("/admins")

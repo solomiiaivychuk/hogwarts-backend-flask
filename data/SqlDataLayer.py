@@ -64,8 +64,20 @@ class SqlDataLayer(DataLayer):
         finally:
             cursor.close()
 
+    def get_student_by_email(self, email):
+        cursor = self.__sqlDb.cursor()
+        try:
+            result = None
+            sql = "SELECT email, first_name, last_name FROM students WHERE email = %s"
+            value = (email,)
+            cursor.execute(sql, value)
+            for (email, first_name, last_name) in cursor:
+                result = {"email": email, "first_name": first_name, "last_name": last_name}
+            return result
+        finally:
+            cursor.close()
+
     def add_student(self, content):
-        print(content)
         email = content['email']
         first_name = content['first_name']
         last_name = content['last_name']
