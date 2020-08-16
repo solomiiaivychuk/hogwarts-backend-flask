@@ -43,9 +43,10 @@ class SqlDataLayer(DataLayer):
         cursor = self.__sqlDb.cursor()
         try:
             result = None
-            sql = "SELECT email FROM admins WHERE email = '%s' AND password = '%s'"
-            cursor.execute(sql)
-            for email in cursor:
+            sql = "SELECT email FROM admins WHERE email = %s AND password = %s"
+            value = (email, password)
+            cursor.execute(sql, value)
+            for (email) in cursor:
                 result = {'email': email}
             return result
         finally:
