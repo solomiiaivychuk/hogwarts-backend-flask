@@ -63,15 +63,33 @@ class SqlDataLayer(DataLayer):
         finally:
             cursor.close()
 
-    def add_student(self, id, email, first_name, last_name):
+    def add_student(self, content):
+        print(content)
+        email = content['email']
+        first_name = content['first_name']
+        last_name = content['last_name']
         cursor = self.__sqlDb.cursor()
         try:
             self.__sqlDb.start_transaction()
-            sql = "INSERT INTO students (id, email, first_name, last_name) VALUES (%s, %s, %s, %s)"
-            value = (id, email, first_name, last_name)
+            sql = "INSERT INTO students (email, first_name, last_name) VALUES (%s, %s, %s)"
+            value = (email, first_name, last_name)
             cursor.execute(sql, value)
             self.__sqlDb.commit()
             print(cursor.rowcount, "Inserted successfully")
             return cursor.rowcount
         finally:
             cursor.close()
+
+    def remove_student(self, email):
+        cursor = self.__sqlDb.cursor()
+        try:
+            self.__sqlDb.start_transaction()
+            sql = "DELETE FROM students WHERE email = %s"
+            value = (email,)
+            cursor.execute(sql, value)
+            self.__sqlDb.commit()
+            print(cursor.rowcount, "Deleted successfully")
+            return cursor.rowcount
+        finally:
+            cursor.close()
+

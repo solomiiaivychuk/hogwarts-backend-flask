@@ -117,10 +117,10 @@ def edit_field():
 # delete a student
 @app.route('/students', methods=['DELETE'])
 @cross_origin()
-def delete_student():
+def remove_student():
     content = request.json
-    print(str.format("Deleting ", content))
-    return DataLayer.remove_student(content)
+    print(content)
+    return json.dumps(data_layer.remove_student(content['email']))
 
 # persist dictionary to a file
 @app.route('/save_dictionary')
