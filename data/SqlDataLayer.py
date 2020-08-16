@@ -56,10 +56,17 @@ class SqlDataLayer(DataLayer):
         cursor = self.__sqlDb.cursor()
         try:
             results = []
-            students_sql = "SELECT * FROM students JOIN existing_skills JOIN desired_skills"
+            students_sql = "SELECT * FROM hogwarts.students " \
+                           "LEFT JOIN hogwarts.existing_skills " \
+                           "ON students.id = existing_skills.student_id " \
+                           "LEFT JOIN hogwarts.desired_skills " \
+                           "ON students.id = desired_skills.student_id"
             cursor.execute(students_sql)
-            for (student_id, email, first_name, last_name) in cursor:
-                results.append({"id": student_id, "email": email, "first_name": first_name, "last_name": last_name})
+            
+            for (student_id, email, first_name, last_name, id_existing_skills, ex_stud_id, ex_skill_name, ex_skill_level,
+                 id_des_skill, des_stud_id, des_skill_name) in cursor:
+                results.append({"id": student_id, "email": email, "first_name": first_name, "last_name": last_name,
+                                "existing_skills": ex_skill_name+ex_skill_level, "desires_skills": des_skill_name})
             return results
         finally:
             cursor.close()
