@@ -56,8 +56,8 @@ class SqlDataLayer(DataLayer):
         cursor = self.__sqlDb.cursor()
         try:
             results = []
-            sql = "SELECT * FROM students"
-            cursor.execute(sql)
+            students_sql = "SELECT * FROM students JOIN existing_skills JOIN desired_skills"
+            cursor.execute(students_sql)
             for (student_id, email, first_name, last_name) in cursor:
                 results.append({"id": student_id, "email": email, "first_name": first_name, "last_name": last_name})
             return results
@@ -81,14 +81,26 @@ class SqlDataLayer(DataLayer):
         email = content['email']
         first_name = content['first_name']
         last_name = content['last_name']
+        existing_skills_arr = content['existing_skills']
+        desired_skills_arr = content['desired_skills']
         cursor = self.__sqlDb.cursor()
         try:
             self.__sqlDb.start_transaction()
-            sql = "INSERT INTO students (email, first_name, last_name) VALUES (%s, %s, %s)"
-            value = (email, first_name, last_name)
-            cursor.execute(sql, value)
+            student_sql = "INSERT INTO students (email, first_name, last_name) VALUES (%s, %s, %s)"
+            student_value = (email, first_name, last_name)
+            cursor.execute(student_sql, student_value)
             self.__sqlDb.commit()
-            print(cursor.rowcount, "Inserted successfully")
+            stud_id = cursor.lastrowid
+            for skill in existing_skills_arr:
+                ex_skills_sql = "INSERT INTO existing_skills (student_id, skill_name, skill_level) VALUES (%s, %s, %s)"
+                ex_skills_value = (stud_id, skill['name'], skill['level'])
+                cursor.execute(ex_skills_sql, ex_skills_value)
+                self.__sqlDb.commit()
+            for skill in desired_skills_arr:
+                des_skills_sql = "INSERT INTO desired_skills (student_id, skill_name) VALUES (%s, %s)"
+                des_skills_value = (stud_id, skill['name'])
+                cursor.execute(des_skills_sql, des_skills_value)
+                self.__sqlDb.commit()
             return cursor.rowcount
         finally:
             cursor.close()
