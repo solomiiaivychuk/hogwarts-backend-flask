@@ -35,10 +35,9 @@ def sign_up_admin():
 @cross_origin()
 def login_admin():
     content = request.json
-    print(content)
-    data_layer.login_admin(content)
+    admin = data_layer.login_admin(content)
     response = app.response_class(
-        response=json.dumps("success"),
+        response=json.dumps(admin),
         status=200,
         mimetype='application/json'
     )

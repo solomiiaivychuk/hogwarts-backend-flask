@@ -37,6 +37,20 @@ class SqlDataLayer(DataLayer):
         finally:
             cursor.close()
 
+    def login_admin(self, data):
+        email = data["email"]
+        password = data["password"]
+        cursor = self.__sqlDb.cursor()
+        try:
+            result = None
+            sql = "SELECT email FROM admins WHERE email = '%s' AND password = '%s'"
+            cursor.execute(sql)
+            for email in cursor:
+                result = {'email': email}
+            return result
+        finally:
+            cursor.close()
+
     def get_students(self):
         cursor = self.__sqlDb.cursor()
         try:
@@ -61,4 +75,3 @@ class SqlDataLayer(DataLayer):
             return cursor.rowcount
         finally:
             cursor.close()
-

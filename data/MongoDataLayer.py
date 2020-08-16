@@ -26,6 +26,7 @@ class MongoDataLayer(DataLayer):
             return e
 
     def login_admin(self, data):
+        print(data)
         email = data['email']
         password = data['password']
         try:
@@ -33,6 +34,18 @@ class MongoDataLayer(DataLayer):
         except Exception as e:
             print(e)
 
+    def get_admins(self):
+        return self.get_admins_ad_dict()
+
+    def get_admins_ad_dict(self):
+        admins_dict = {}
+        admins = self.__db.admins.find()
+        for admin in admins:
+            admins_dict[admin["email"]] = {
+                "email": admin["email"],
+                "password": admin["password"],
+            }
+        return admins_dict
 
     #get all students as dictionary
     def get_students_as_dict(self):

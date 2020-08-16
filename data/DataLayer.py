@@ -16,6 +16,9 @@ class DataLayer:
     def get_admins(self):
         pass
 
+    def login_admin(self, data):
+        pass
+
     def get_students(self):
         pass
 
