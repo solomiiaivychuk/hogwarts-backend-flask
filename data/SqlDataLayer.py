@@ -170,4 +170,17 @@ class SqlDataLayer(DataLayer):
                 return num
         finally:
             cursor.close()
-            
+
+    def get_students_added_on_date(self, date):
+        cursor = self.__sqlDb.cursor()
+        query_date = str.format(date+'%')
+        try:
+            results = []
+            sql = "SELECT first_name, last_name, creation_time FROM hogwarts.students WHERE students.creation_time LIKE %s"
+            value = (query_date,)
+            cursor.execute(sql, value)
+            for (first_name, last_name, creation_time) in cursor:
+                results.append({"first_name": first_name, "last_name": last_name, "creation_time": creation_time})
+            return results
+        finally:
+            cursor.close()

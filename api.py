@@ -64,15 +64,18 @@ def get_students_by_email(email):
 
 
 # get added students per day of the year - day will be a query param
-@app.route('/students/date')
+@app.route('/students_added_on_date')
 @cross_origin()
 def get_students_added_on_date():
-    creation_year = request.args.get('year')
-    creation_month = request.args.get('month')
-    creation_day = request.args.get('day')
-    response = []
-    """"""
-    return json.dumps(response)
+    content = request.json
+    date = content['date']
+    students = data_layer.get_students_added_on_date(date)
+    response = app.response_class(
+        response=json.dumps(students),
+        status=200,
+        mimetype="application.json"
+    )
+    return response
 
 
 # add a new student (request which will be invoked by admin) - the route will receive a json with the student fields.
