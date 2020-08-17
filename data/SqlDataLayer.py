@@ -1,6 +1,7 @@
 import mysql.connector
 from decouple import config
 from flask import json
+from data.Student import Student
 
 from data.DataLayer import DataLayer
 
@@ -56,17 +57,36 @@ class SqlDataLayer(DataLayer):
         cursor = self.__sqlDb.cursor()
         try:
             results = []
-            students_sql = "SELECT * FROM hogwarts.students " \
+            """
+            all_data_sql = "SELECT * FROM hogwarts.students " \
                            "LEFT JOIN hogwarts.existing_skills " \
                            "ON students.id = existing_skills.student_id " \
                            "LEFT JOIN hogwarts.desired_skills " \
                            "ON students.id = desired_skills.student_id"
+            """
+            students_sql = "SELECT * FROM hogwarts.students"
             cursor.execute(students_sql)
-            
-            for (student_id, email, first_name, last_name, id_existing_skills, ex_stud_id, ex_skill_name, ex_skill_level,
-                 id_des_skill, des_stud_id, des_skill_name) in cursor:
+
+            for (student_id, email, first_name, last_name, creation_time, update_time) in cursor:
+
+                ex_skills_arr = []
+                desired_skills_arr = []
+
+                ex_skills_sql = "SELECT skill_name, skill_level FROM hogwarts.existing_skills WHERE student_id = %s"
+                value = (student_id,)
+                cursor.execute(ex_skills_sql, value)
+                for(skill_name, skill_level) in cursor:
+                    ex_skills_arr.append({"skill_name": skill_name, "skill_level": skill_level})
+
+                des_skills_sql = "SELECT skill_name FROM hogwarts.desired_skills WHERE student_id = %s"
+                value = (student_id,)
+                cursor.execute(des_skills_sql, value)
+                for (skill_name) in cursor:
+                    desired_skills_arr.append({"skill_name": skill_name})
+
                 results.append({"id": student_id, "email": email, "first_name": first_name, "last_name": last_name,
-                                "existing_skills": ex_skill_name+ex_skill_level, "desires_skills": des_skill_name})
+                                "creation_time": creation_time, "update_time": update_time,
+                                "existing_skills": ex_skills_arr, "desires_skills": desired_skills_arr})
             return results
         finally:
             cursor.close()
@@ -90,11 +110,15 @@ class SqlDataLayer(DataLayer):
         last_name = content['last_name']
         existing_skills_arr = content['existing_skills']
         desired_skills_arr = content['desired_skills']
+        new_student = Student.from_json(email, first_name, last_name, existing_skills_arr, desired_skills_arr)
+        creation_time = new_student.get_creation_time()
+        update_time = new_student.get_update_time()
         cursor = self.__sqlDb.cursor()
         try:
             self.__sqlDb.start_transaction()
-            student_sql = "INSERT INTO students (email, first_name, last_name) VALUES (%s, %s, %s)"
-            student_value = (email, first_name, last_name)
+            student_sql = "INSERT INTO students (email, first_name, last_name, creation_time, update_time)" \
+                          " VALUES (%s, %s, %s, %s, %s)"
+            student_value = (email, first_name, last_name, creation_time, update_time)
             cursor.execute(student_sql, student_value)
             self.__sqlDb.commit()
             stud_id = cursor.lastrowid
@@ -125,3 +149,25 @@ class SqlDataLayer(DataLayer):
         finally:
             cursor.close()
 
+    def get_num_of_students_having_specific_skill(self, skill):
+        cursor = self.__sqlDb.cursor()
+        try:
+            sql = "SELECT COUNT(student_id) from hogwarts.existing_skills WHERE existing_skills.skill_name = %s"
+            value = (skill,)
+            cursor.execute(sql, value)
+            for num in cursor:
+                return num
+        finally:
+            cursor.close()
+
+    def get_num_of_students_wanting_specific_skill(self, skill):
+        cursor = self.__sqlDb.cursor()
+        try:
+            sql = "SELECT COUNT(student_id) from hogwarts.desired_skills WHERE desired_skills.skill_name = %s"
+            value = (skill,)
+            cursor.execute(sql, value)
+            for num in cursor:
+                return num
+        finally:
+            cursor.close()
+            

@@ -120,7 +120,8 @@ def persist_data_to_file():
 def get_existing_skill():
     content = request.json
     skill = content['skill']
-    return data_layer.get_students_having_specific_skill(skill)
+    num = data_layer.get_num_of_students_having_specific_skill(skill)
+    return json.dumps(num)
 
 
 #how many students have specific desired skill
@@ -129,7 +130,8 @@ def get_existing_skill():
 def get_desired_skill():
     content = request.json
     skill = content['skill']
-    return data_layer.get_desired_skill(skill)
+    num = data_layer.get_num_of_students_wanting_specific_skill(skill)
+    return json.dumps(num)
 
 
 @app.route("/admins")
