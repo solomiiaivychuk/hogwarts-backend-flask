@@ -63,12 +63,13 @@ def get_students_by_email(email):
     return data_layer.get_student_by_email(email)
 
 
-# get added students per day of the year - day will be a query param
-@app.route('/students_added_on_date')
+# get students added on a specific date
+@app.route('/students_added_on_date', methods=["POST"])
 @cross_origin()
 def get_students_added_on_date():
     content = request.json
     date = content['date']
+    print(date)
     students = data_layer.get_students_added_on_date(date)
     response = app.response_class(
         response=json.dumps(students),
@@ -118,23 +119,33 @@ def persist_data_to_file():
     return "Success"
 
 #how many students have specific skill
-@app.route('/existing_skills')
+@app.route('/existing_skills', methods=["POST"])
 @cross_origin()
 def get_existing_skill():
     content = request.json
     skill = content['skill']
-    num = data_layer.get_num_of_students_having_specific_skill(skill)
-    return json.dumps(num)
+    res = data_layer.get_list_of_students_having_specific_skill(skill)
+    response = app.response_class(
+        response={json.dumps(res)},
+        status=200,
+        mimetype='application/json'
+    )
+    return response
 
 
 #how many students have specific desired skill
-@app.route('/desired_skills')
+@app.route('/desired_skills', methods=["POST"])
 @cross_origin()
 def get_desired_skill():
     content = request.json
     skill = content['skill']
-    num = data_layer.get_num_of_students_wanting_specific_skill(skill)
-    return json.dumps(num)
+    res = data_layer.get_list_of_students_wanting_specific_skill(skill)
+    response = app.response_class(
+        response={json.dumps(res)},
+        status=200,
+        mimetype='application/json'
+    )
+    return response
 
 
 @app.route("/admins")
@@ -148,10 +159,21 @@ def get_admins():
     )
     return response
 
+@app.route("/popular_skills")
+@cross_origin()
+def get_all_desired_skills():
+    skills = data_layer.get_all_desired_skills()
+    response = app.response_class(
+        response=json.dumps(skills),
+        status=200,
+        mimetype="application.json"
+    )
+    return response
+
 if __name__ == '__main__':
     app.run()
 
 @atexit
 def exit_db():
-    DataLayer.shutdown()
+    data_layer.close()
 

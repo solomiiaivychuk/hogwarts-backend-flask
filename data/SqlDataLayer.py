@@ -38,6 +38,21 @@ class SqlDataLayer(DataLayer):
         finally:
             cursor.close()
 
+    def add_admin(self, data):
+        email = data['email']
+        password = data['password']
+        cursor = self.__sqlDb.cursor()
+        try:
+            self.__sqlDb.start_transaction()
+            sql = "INSERT INTO admins (email, password) VALUES (%s, %s)"
+            values = (email, password)
+            cursor.execute(sql, values)
+            self.__sqlDb.commit()
+            return cursor.rowcount
+        finally:
+            cursor.close()
+
+
     def login_admin(self, data):
         email = data["email"]
         password = data["password"]
@@ -56,37 +71,44 @@ class SqlDataLayer(DataLayer):
     def get_students(self):
         cursor = self.__sqlDb.cursor()
         try:
+            self.__sqlDb.start_transaction()
             results = []
-            """
-            all_data_sql = "SELECT * FROM hogwarts.students " \
-                           "LEFT JOIN hogwarts.existing_skills " \
+            sql = "SELECT email, first_name, last_name FROM hogwarts.students"
+            cursor.execute(sql)
+            for(email, first_name, last_name) in cursor:
+                results.append({"email": email, "first_name": first_name, "last_name": last_name})
+            return results
+        finally:
+            cursor.close()
+
+
+    def get_students_with_skills(self):
+        cursor = self.__sqlDb.cursor()
+        try:
+            self.__sqlDb.start_transaction()
+            results = []
+            all_data_sql = "SELECT DISTINCT id, email, first_name, last_name, " \
+                           "creation_time, update_time, " \
+                           "existing_skills.skill_name existing_skill_name, " \
+                           "existing_skills.skill_level existing_skill_level, " \
+                           "desired_skills.skill_name desired_skill_name " \
+                           "FROM hogwarts.students " \
+                           "INNER JOIN hogwarts.existing_skills " \
                            "ON students.id = existing_skills.student_id " \
-                           "LEFT JOIN hogwarts.desired_skills " \
+                           "INNER JOIN hogwarts.desired_skills " \
                            "ON students.id = desired_skills.student_id"
-            """
-            students_sql = "SELECT * FROM hogwarts.students"
-            cursor.execute(students_sql)
 
-            for (student_id, email, first_name, last_name, creation_time, update_time) in cursor:
-
-                ex_skills_arr = []
-                desired_skills_arr = []
-
-                ex_skills_sql = "SELECT skill_name, skill_level FROM hogwarts.existing_skills WHERE student_id = %s"
-                value = (student_id,)
-                cursor.execute(ex_skills_sql, value)
-                for(skill_name, skill_level) in cursor:
-                    ex_skills_arr.append({"skill_name": skill_name, "skill_level": skill_level})
-
-                des_skills_sql = "SELECT skill_name FROM hogwarts.desired_skills WHERE student_id = %s"
-                value = (student_id,)
-                cursor.execute(des_skills_sql, value)
-                for (skill_name) in cursor:
-                    desired_skills_arr.append({"skill_name": skill_name})
-
+            cursor.execute(all_data_sql)
+            for (student_id, email, first_name, last_name, creation_time, update_time, existing_skill_name,
+                 existing_skill_level, desired_skill_name) in cursor:
+                new_student = Student.from_db(email, first_name, last_name, creation_time, update_time,
+                                              existing_skill_name, desired_skill_name)
+                print(new_student)
                 results.append({"id": student_id, "email": email, "first_name": first_name, "last_name": last_name,
                                 "creation_time": creation_time, "update_time": update_time,
-                                "existing_skills": ex_skills_arr, "desires_skills": desired_skills_arr})
+                                "existing_skills_name": existing_skill_name,
+                                "existing_skill_level": existing_skill_level,
+                                "desired_skills": desired_skill_name})
             return results
         finally:
             cursor.close()
@@ -95,10 +117,19 @@ class SqlDataLayer(DataLayer):
         cursor = self.__sqlDb.cursor()
         try:
             result = None
-            sql = "SELECT email, first_name, last_name FROM students WHERE email = %s"
+            sql = "SELECT email, first_name, last_name, " \
+                  "existing_skills.skill_name existing_skill_name, " \
+                  "existing_skills.skill_level existing_skill_level, " \
+                  "desired_skills.skill_name desired_skill_name " \
+                  "FROM hogwarts.students " \
+                  "INNER JOIN hogwarts.existing_skills " \
+                  "ON students.id = existing_skills.student_id " \
+                  "INNER JOIN hogwarts.desired_skills " \
+                  "ON students.id = desired_skills.student_id " \
+                  "WHERE email = %s;"
             value = (email,)
             cursor.execute(sql, value)
-            for (email, first_name, last_name) in cursor:
+            for (email, first_name, last_name, existing_skill_name, existing_skill_level, desired_skill_name) in cursor:
                 result = {"email": email, "first_name": first_name, "last_name": last_name}
             return result
         finally:
@@ -149,10 +180,45 @@ class SqlDataLayer(DataLayer):
         finally:
             cursor.close()
 
+    def get_list_of_students_having_specific_skill(self, skill):
+        try:
+            results = []
+            cursor = self.__sqlDb.cursor()
+            sql = "SELECT email from hogwarts.students " \
+                  "JOIN hogwarts.existing_skills " \
+                  "ON existing_skills.student_id = students.id " \
+                  "WHERE skill_name = %s"
+            value = (skill,)
+            cursor.execute(sql, value)
+            for (email) in cursor:
+                results.append({"email": email})
+            return results
+        finally:
+            cursor.close()
+
+    def get_list_of_students_wanting_specific_skill(self, skill):
+        try:
+            results = []
+            cursor = self.__sqlDb.cursor()
+            sql = "SELECT email from hogwarts.students " \
+                  "JOIN hogwarts.desired_skills " \
+                  "ON desired_skills.student_id = students.id " \
+                  "WHERE skill_name = %s"
+            value = (skill,)
+            cursor.execute(sql, value)
+            for (email) in cursor:
+                results.append({"email": email})
+            return results
+        finally:
+            cursor.close()
+
+
+
     def get_num_of_students_having_specific_skill(self, skill):
         cursor = self.__sqlDb.cursor()
         try:
-            sql = "SELECT COUNT(student_id) from hogwarts.existing_skills WHERE existing_skills.skill_name = %s"
+            sql = "SELECT COUNT(student_id) FROM hogwarts.existing_skills " \
+                  "WHERE existing_skills.skill_name = %s"
             value = (skill,)
             cursor.execute(sql, value)
             for num in cursor:
@@ -163,7 +229,8 @@ class SqlDataLayer(DataLayer):
     def get_num_of_students_wanting_specific_skill(self, skill):
         cursor = self.__sqlDb.cursor()
         try:
-            sql = "SELECT COUNT(student_id) from hogwarts.desired_skills WHERE desired_skills.skill_name = %s"
+            sql = "SELECT COUNT(student_id) FROM hogwarts.desired_skills " \
+                  "WHERE desired_skills.skill_name = %s"
             value = (skill,)
             cursor.execute(sql, value)
             for num in cursor:
@@ -176,11 +243,29 @@ class SqlDataLayer(DataLayer):
         query_date = str.format(date+'%')
         try:
             results = []
-            sql = "SELECT first_name, last_name, creation_time FROM hogwarts.students WHERE students.creation_time LIKE %s"
+            sql = "SELECT email " \
+                  "FROM hogwarts.students " \
+                  "WHERE students.creation_time LIKE %s"
             value = (query_date,)
             cursor.execute(sql, value)
-            for (first_name, last_name, creation_time) in cursor:
-                results.append({"first_name": first_name, "last_name": last_name, "creation_time": creation_time})
+            for (email) in cursor:
+                results.append({"email": email})
             return results
         finally:
             cursor.close()
+
+    def get_all_desired_skills(self):
+        cursor = self.__sqlDb.cursor()
+        try:
+            self.__sqlDb.start_transaction()
+            results = []
+            sql = "SELECT skill_name, COUNT(skill_name) count " \
+                  "FROM hogwarts.desired_skills " \
+                  "GROUP BY skill_name"
+            cursor.execute(sql)
+            for (skill_name, count) in cursor:
+                results.append({"name": skill_name, "value": count})
+            return results
+        finally:
+            cursor.close()
+

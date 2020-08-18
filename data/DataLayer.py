@@ -49,3 +49,6 @@ class DataLayer:
     def get_studs_by_desired_skill(self, skill):
         pass
 
+    def get_all_desired_skills(self):
+        pass
+

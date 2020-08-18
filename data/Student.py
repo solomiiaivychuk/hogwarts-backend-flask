@@ -74,8 +74,7 @@ class Student(Person, dict):
             return None
 
     @classmethod
-    def from_file(cls, email, first_name, last_name, existing_skills, desired_skills, creation_time,
-                  update_time):
+    def from_db(cls, email, first_name, last_name, creation_time, update_time, existing_skills, desired_skills):
         new_student = cls(email, first_name, last_name, creation_time, update_time, existing_skills,
                           desired_skills)
         if Student.validate_new_student(new_student) is True:
