@@ -27,8 +27,8 @@ class SqlDataLayer(DataLayer):
         self.__sqlDb.close()
 
     def get_admins(self):
-        cursor = self.__sqlDb.cursor()
         try:
+            cursor = self.__sqlDb.cursor()
             results = []
             sql = "SELECT * FROM admins"
             cursor.execute(sql)
@@ -41,8 +41,8 @@ class SqlDataLayer(DataLayer):
     def add_admin(self, data):
         email = data['email']
         password = data['password']
-        cursor = self.__sqlDb.cursor()
         try:
+            cursor = self.__sqlDb.cursor()
             self.__sqlDb.start_transaction()
             sql = "INSERT INTO admins (email, password) VALUES (%s, %s)"
             values = (email, password)
@@ -56,8 +56,8 @@ class SqlDataLayer(DataLayer):
     def login_admin(self, data):
         email = data["email"]
         password = data["password"]
-        cursor = self.__sqlDb.cursor()
         try:
+            cursor = self.__sqlDb.cursor()
             result = None
             sql = "SELECT email FROM admins WHERE email = %s AND password = %s"
             value = (email, password)
@@ -69,8 +69,8 @@ class SqlDataLayer(DataLayer):
             cursor.close()
 
     def get_students(self):
-        cursor = self.__sqlDb.cursor()
         try:
+            cursor = self.__sqlDb.cursor()
             self.__sqlDb.start_transaction()
             results = []
             sql = "SELECT email, first_name, last_name FROM hogwarts.students"
@@ -83,8 +83,8 @@ class SqlDataLayer(DataLayer):
 
 
     def get_students_with_skills(self):
-        cursor = self.__sqlDb.cursor()
         try:
+            cursor = self.__sqlDb.cursor()
             self.__sqlDb.start_transaction()
             results = []
             all_data_sql = "SELECT DISTINCT id, email, first_name, last_name, " \
@@ -114,9 +114,11 @@ class SqlDataLayer(DataLayer):
             cursor.close()
 
     def get_student_by_email(self, email):
-        cursor = self.__sqlDb.cursor()
         try:
-            result = None
+            cursor = self.__sqlDb.cursor()
+            result = {}
+            existing_skills = {}
+            desired_skills = {}
             sql = "SELECT email, first_name, last_name, " \
                   "existing_skills.skill_name existing_skill_name, " \
                   "existing_skills.skill_level existing_skill_level, " \
@@ -130,7 +132,21 @@ class SqlDataLayer(DataLayer):
             value = (email,)
             cursor.execute(sql, value)
             for (email, first_name, last_name, existing_skill_name, existing_skill_level, desired_skill_name) in cursor:
-                result = {"email": email, "first_name": first_name, "last_name": last_name}
+                existing_skills[existing_skill_name] = {
+                    "skill_name": existing_skill_name,
+                    "skill_level": existing_skill_level
+                }
+                desired_skills[desired_skill_name] = {
+                    "skill_name": desired_skill_name
+                }
+                result[email] = {
+                    "email": email,
+                    "first_name": first_name,
+                    "last_name": last_name,
+                    "existing_skills": existing_skills,
+                    "desired_skills": desired_skills
+                }
+            print(result)
             return result
         finally:
             cursor.close()
@@ -144,8 +160,8 @@ class SqlDataLayer(DataLayer):
         new_student = Student.from_json(email, first_name, last_name, existing_skills_arr, desired_skills_arr)
         creation_time = new_student.get_creation_time()
         update_time = new_student.get_update_time()
-        cursor = self.__sqlDb.cursor()
         try:
+            cursor = self.__sqlDb.cursor()
             self.__sqlDb.start_transaction()
             student_sql = "INSERT INTO students (email, first_name, last_name, creation_time, update_time)" \
                           " VALUES (%s, %s, %s, %s, %s)"
@@ -168,8 +184,8 @@ class SqlDataLayer(DataLayer):
             cursor.close()
 
     def remove_student(self, email):
-        cursor = self.__sqlDb.cursor()
         try:
+            cursor = self.__sqlDb.cursor()
             self.__sqlDb.start_transaction()
             sql = "DELETE FROM students WHERE email = %s"
             value = (email,)
