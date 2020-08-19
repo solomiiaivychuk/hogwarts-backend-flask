@@ -1,8 +1,6 @@
 import mysql.connector
 from decouple import config
-from flask import json
 from data.Student import Student
-
 from data.DataLayer import DataLayer
 
 
@@ -35,6 +33,10 @@ class SqlDataLayer(DataLayer):
             for (admin_id, email, password) in cursor:
                 results.append({"id": admin_id, "email": email, "password": password})
             return results
+        except mysql.connector.Error as error:
+            self.__sqlDb.rollback()
+            print(error)
+            return error
         finally:
             cursor.close()
 
@@ -43,12 +45,15 @@ class SqlDataLayer(DataLayer):
         password = data['password']
         try:
             cursor = self.__sqlDb.cursor()
-            self.__sqlDb.start_transaction()
             sql = "INSERT INTO admins (email, password) VALUES (%s, %s)"
             values = (email, password)
             cursor.execute(sql, values)
             self.__sqlDb.commit()
             return cursor.rowcount
+        except mysql.connector.Error as error:
+            self.__sqlDb.rollback()
+            print(error)
+            return error
         finally:
             cursor.close()
 
@@ -65,27 +70,32 @@ class SqlDataLayer(DataLayer):
             for (email) in cursor:
                 result = {'email': email}
             return result
+        except mysql.connector.Error as error:
+            self.__sqlDb.rollback()
+            print(error)
+            return error
         finally:
             cursor.close()
 
     def get_students(self):
+        cursor = self.__sqlDb.cursor()
         try:
-            cursor = self.__sqlDb.cursor()
-            self.__sqlDb.start_transaction()
             results = []
             sql = "SELECT email, first_name, last_name FROM hogwarts.students"
             cursor.execute(sql)
             for(email, first_name, last_name) in cursor:
                 results.append({"email": email, "first_name": first_name, "last_name": last_name})
             return results
+        except mysql.connector.Error as error:
+            self.__sqlDb.rollback()
+            print(error)
+            return error
         finally:
             cursor.close()
-
 
     def get_students_with_skills(self):
         try:
             cursor = self.__sqlDb.cursor()
-            self.__sqlDb.start_transaction()
             results = []
             all_data_sql = "SELECT DISTINCT id, email, first_name, last_name, " \
                            "creation_time, update_time, " \
@@ -110,12 +120,17 @@ class SqlDataLayer(DataLayer):
                                 "existing_skill_level": existing_skill_level,
                                 "desired_skills": desired_skill_name})
             return results
+        except mysql.connector.Error as error:
+            self.__sqlDb.rollback()
+            print(error)
+            return error
         finally:
             cursor.close()
 
     def get_student_by_email(self, email):
+        cursor = self.__sqlDb.cursor()
         try:
-            cursor = self.__sqlDb.cursor()
+
             result = {}
             existing_skills = {}
             desired_skills = {}
@@ -146,8 +161,11 @@ class SqlDataLayer(DataLayer):
                     "existing_skills": existing_skills,
                     "desired_skills": desired_skills
                 }
-            print(result)
             return result
+        except mysql.connector.Error as error:
+            self.__sqlDb.rollback()
+            print(error)
+            return error
         finally:
             cursor.close()
 
@@ -180,16 +198,32 @@ class SqlDataLayer(DataLayer):
                 cursor.execute(des_skills_sql, des_skills_value)
                 self.__sqlDb.commit()
             return cursor.rowcount
+        except mysql.connector.Error as error:
+            self.__sqlDb.rollback()
+            print(error)
+            return error
         finally:
             cursor.close()
 
     def remove_student(self, email):
         try:
+            s_id = None
             cursor = self.__sqlDb.cursor()
-            self.__sqlDb.start_transaction()
-            sql = "DELETE FROM students WHERE email = %s"
+            sql_select = "SELECT id FROM students WHERE email = %s"
             value = (email,)
-            cursor.execute(sql, value)
+            cursor.execute(sql_select, value)
+            for data in cursor:
+                s_id = data
+            print(s_id)
+            sql_del_from_existing_skills = "DELETE from existing_skills WHERE student_id = %s"
+            value = s_id
+            cursor.execute(sql_del_from_existing_skills, value)
+            sql_del_from_desired_skills = "DELETE from desired_skills WHERE student_id = %s"
+            value = s_id
+            cursor.execute(sql_del_from_desired_skills, value)
+            sql_del_from_students = "DELETE from students WHERE id = %s"
+            value = s_id
+            cursor.execute(sql_del_from_students, value)
             self.__sqlDb.commit()
             print(cursor.rowcount, "Deleted successfully")
             return cursor.rowcount
@@ -225,6 +259,10 @@ class SqlDataLayer(DataLayer):
             for (email) in cursor:
                 results.append({"email": email})
             return results
+        except mysql.connector.Error as error:
+            self.__sqlDb.rollback()
+            print(error)
+            return error
         finally:
             cursor.close()
 
@@ -239,6 +277,10 @@ class SqlDataLayer(DataLayer):
             cursor.execute(sql, value)
             for num in cursor:
                 return num
+        except mysql.connector.Error as error:
+            self.__sqlDb.rollback()
+            print(error)
+            return error
         finally:
             cursor.close()
 
@@ -273,7 +315,6 @@ class SqlDataLayer(DataLayer):
     def get_all_desired_skills(self):
         cursor = self.__sqlDb.cursor()
         try:
-            self.__sqlDb.start_transaction()
             results = []
             sql = "SELECT skill_name, COUNT(skill_name) count " \
                   "FROM hogwarts.desired_skills " \
@@ -282,6 +323,10 @@ class SqlDataLayer(DataLayer):
             for (skill_name, count) in cursor:
                 results.append({"name": skill_name, "value": count})
             return results
+        except mysql.connector.Error as error:
+            self.__sqlDb.rollback()
+            print(error)
+            return error
         finally:
             cursor.close()
 

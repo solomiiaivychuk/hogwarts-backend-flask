@@ -108,8 +108,8 @@ def edit_field():
 @cross_origin()
 def remove_student():
     content = request.json
-    print(content)
-    return json.dumps(data_layer.remove_student(content['email']))
+    data_layer.remove_student(content['email'])
+    return "Deleted successfully"
 
 # persist dictionary to a file
 @app.route('/save_dictionary')
